@@ -77,6 +77,11 @@
                 <button data-kit="ouro" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg font-semibold">Ouro</button>
             </div>
         </div>
+        
+        <!-- Indicador de Carregamento -->
+        <div id="loadingIndicator" class="text-center py-10">
+            <p class="text-lg text-gray-500">Carregando temas...</p>
+        </div>
 
         <!-- Container do Catálogo -->
         <main id="theme-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></main>
@@ -119,7 +124,11 @@
             <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
         </div>
     </div>
-
+    
+    <!-- SCRIPTS DO FIREBASE (Adicionados) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+    
     <!-- Link para o seu arquivo de script -->
     <script src="script.js"></script>
 </body>
