@@ -1,4 +1,7 @@
-// --- JAVASCRIPT COM FIREBASE ---
+// --- JAVASCRIPT COM FIREBASE E AUTENTICAÇÃO (VERSÃO DE DIAGNÓSTICO) ---
+
+// MENSAGEM 1: Confirma que o ficheiro script.js foi carregado.
+console.log("FICHEIRO SCRIPT.JS CARREGADO. A inicializar o Firebase...");
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9rM4TwAhSPU_e96W0xqg1IDYENFup5i8",
@@ -11,24 +14,106 @@ const firebaseConfig = {
 
 // Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); // Conexão com o banco de dados Firestore
-const themesCollection = db.collection('themes'); // Referência à nossa coleção de temas
+const db = firebase.firestore();
+const auth = firebase.auth();
+const themesCollection = db.collection('themes');
+
+// MENSAGEM 2: Confirma que o script está à espera que o HTML seja carregado.
+console.log("A aguardar pelo evento DOMContentLoaded...");
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    let themes = []; // Esta variável agora será um cache dos dados do Firebase
+    // MENSAGEM 3: Esta é a mensagem mais importante. Se esta aparecer, o coração do script está a funcionar.
+    console.log("EVENTO DOMCONTENTLOADED DISPARADO. O SCRIPT PRINCIPAL ESTÁ A EXECUTAR.");
 
+    let themes = [];
     const kitDetails = {
         bronze: { price: 'R$ 150,00', class: 'bg-orange-300 text-orange-900' },
         prata: { price: 'R$ 250,00', class: 'bg-gray-300 text-gray-800' },
         ouro: { price: 'R$ 300,00', class: 'bg-yellow-400 text-yellow-900' }
     };
 
-    // ELEMENTOS DA PÁGINA
+    const choiceScreen = document.getElementById('choiceScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const mainContent = document.getElementById('mainContent');
+    const customerBtn = document.getElementById('customerBtn');
+    const employeeBtn = document.getElementById('employeeBtn');
+
+    // MENSAGEM 4 e 5: Verificam se o JavaScript conseguiu encontrar os botões no HTML.
+    if (customerBtn) {
+        console.log("SUCESSO: Botão 'customerBtn' encontrado no HTML.");
+    } else {
+        console.error("FALHA: Não foi possível encontrar o botão 'customerBtn' no HTML!");
+    }
+    if (employeeBtn) {
+        console.log("SUCESSO: Botão 'employeeBtn' encontrado no HTML.");
+    } else {
+        console.error("FALHA: Não foi possível encontrar o botão 'employeeBtn' no HTML!");
+    }
+
+    const backToChoiceBtn = document.getElementById('backToChoiceBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginForm = document.getElementById('loginForm');
+    const adminControls = document.getElementById('adminControls');
     const catalogContainer = document.getElementById('theme-catalog');
+
+    // MENSAGEM 6: Confirma que o script está a tentar adicionar a funcionalidade de clique.
+    console.log("A adicionar os 'event listeners' de clique aos botões.");
+    customerBtn.addEventListener('click', () => {
+        console.log("CLIQUE DETETADO: Botão 'Sou Cliente' foi clicado.");
+        showCatalog(false);
+    });
+    employeeBtn.addEventListener('click', () => {
+        console.log("CLIQUE DETETADO: Botão 'Sou Funcionário' foi clicado.");
+        showLoginScreen();
+    });
+    backToChoiceBtn.addEventListener('click', showChoiceScreen);
+
+    // Ouve mudanças no estado de autenticação (login/logout)
+    auth.onAuthStateChanged(user => {
+        console.log("Estado de autenticação verificado. Utilizador:", user ? user.email : "Nenhum");
+        if (user) {
+            showCatalog(true);
+        } else {
+            showChoiceScreen();
+        }
+    });
+
+    function showChoiceScreen() {
+        console.log("A executar: showChoiceScreen()");
+        choiceScreen.style.display = 'flex';
+        loginScreen.style.display = 'none';
+        mainContent.style.display = 'none';
+    }
+
+    function showLoginScreen() {
+        console.log("A executar: showLoginScreen()");
+        choiceScreen.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        mainContent.style.display = 'none';
+    }
+
+    function showCatalog(isAdmin) {
+        console.log(`A executar: showCatalog(). Modo Admin: ${isAdmin}`);
+        choiceScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
+        mainContent.style.display = 'block';
+
+        if (isAdmin) {
+            adminControls.style.display = 'block';
+            logoutBtn.style.display = 'block';
+        } else {
+            adminControls.style.display = 'none';
+            logoutBtn.style.display = 'none';
+        }
+        filterAndSearch();
+    }
+
+    // O resto do código permanece igual, pode deixar como está.
+    // ... (restante das funções de login, logout, displayThemes, modais, etc.) ...
+
     const searchInput = document.getElementById('searchInput');
     const filterButtonsContainer = document.getElementById('filterButtons');
-    const addThemeBtn = document.getElementById('addThemeBtn');
     const addThemeFormContainer = document.getElementById('addThemeFormContainer');
     const addThemeForm = document.getElementById('addThemeForm');
     const formTitle = document.getElementById('formTitle');
@@ -45,22 +130,131 @@ document.addEventListener('DOMContentLoaded', () => {
     const rentalForm = document.getElementById('rentalForm');
     const rentalThemeInfo = document.getElementById('rentalThemeInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
+    const loginMessage = document.getElementById('loginMessage');
+    const addThemeBtn = document.getElementById('addThemeBtn');
 
-    let editingThemeId = null; // Controla se estamos editando ou criando
+    let editingThemeId = null;
 
-    // --- LÓGICA DE DADOS COM FIREBASE ---
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        auth.signInWithEmailAndPassword(email, password)
+            .catch(error => {
+                loginMessage.textContent = 'Email ou senha inválidos.';
+                console.error('Erro de login:', error);
+            });
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut();
+    });
 
     themesCollection.onSnapshot(snapshot => {
-        loadingIndicator.classList.add('hidden');
+        if (loadingIndicator) loadingIndicator.classList.add('hidden');
         themes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         filterAndSearch();
     }, error => {
         console.error("Erro ao buscar temas: ", error);
-        loadingIndicator.textContent = "Erro ao carregar os temas. Verifique a consola.";
+        if (loadingIndicator) loadingIndicator.textContent = "Erro ao carregar os temas.";
     });
 
+    function displayThemes(themesToDisplay) {
+        const currentUser = auth.currentUser;
+        catalogContainer.innerHTML = '';
 
-    // --- FUNÇÕES DE VERIFICAÇÃO DE ALUGUEL ---
+        if (themesToDisplay.length === 0 && loadingIndicator && loadingIndicator.classList.contains('hidden')) {
+            catalogContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 text-xl">Nenhum tema encontrado.</p>`;
+            return;
+        }
+
+        themesToDisplay.forEach(theme => {
+            if (!theme || !theme.name) {
+                console.warn("Tema inválido encontrado na base de dados, a ignorar:", theme);
+                return;
+            }
+            const unavailable = isThemeUnavailableToday(theme);
+            const kitBadges = (theme.kits || []).map(kitKey => {
+                const detail = kitDetails[kitKey];
+                if (!detail) return '';
+                return `<span class="text-xs font-bold mr-2 px-2.5 py-1 rounded-full ${detail.class}">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</span>`;
+            }).join('');
+
+            const adminButtonsHTML = currentUser ? `
+                <div class="absolute top-2 right-2 flex gap-2">
+                    <button class="edit-btn bg-yellow-400 text-white p-2 rounded-full hover:bg-yellow-500 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg></button>
+                    <button class="delete-btn bg-red-500 text-white p-2 rounded-full hover:bg-red-600 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5.5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/></svg></button>
+                </div>
+            ` : '';
+
+            const themeCardHTML = `
+                <div class="theme-card bg-white rounded-lg overflow-hidden shadow-md relative" data-theme-id="${theme.id}">
+                    ${unavailable ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold rounded-lg z-10">INDISPONÍVEL HOJE</div>' : ''}
+                    <img src="${theme.coverImage}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${unavailable ? 'opacity-40' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
+                    <div class="p-4 ${unavailable ? 'opacity-40' : ''}">
+                        <h3 class="text-xl font-bold mb-3">${theme.name}</h3>
+                        <div class="flex flex-wrap gap-2">${kitBadges}</div>
+                    </div>
+                    ${adminButtonsHTML}
+                </div>
+            `;
+            catalogContainer.innerHTML += themeCardHTML;
+        });
+    }
+
+    function openThemeModal(theme) {
+        const currentUser = auth.currentUser;
+        modalThemeName.textContent = theme.name;
+        modalKitsContainer.innerHTML = '';
+        const today = new Date().toISOString().split('T')[0];
+
+        let kitsHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+        (theme.kits || []).forEach(kitKey => {
+            const detail = kitDetails[kitKey];
+            const imageUrl = theme.images?.[kitKey] || theme.coverImage;
+            const isRentedToday = isKitRented(theme, kitKey, today);
+
+            const rentButtonHTML = currentUser && !isRentedToday ?
+                `<button class="rent-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-theme-id="${theme.id}" data-kit="${kitKey}">Agendar Aluguer</button>` :
+                '';
+
+            kitsHTML += `
+                <div class="border rounded-lg p-4 text-center ${isRentedToday ? 'bg-gray-200' : ''}">
+                    <img src="${imageUrl}" class="kit-image w-full h-48 object-cover rounded-md mb-4 ${isRentedToday ? 'opacity-50' : 'hover:opacity-80 transition'}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
+                    <h3 class="text-xl font-semibold">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</h3>
+                    <p class="text-lg font-bold ${detail.class.replace('bg-', 'text-').replace('-300', '-600').replace('-400', '-700')}">${detail.price}</p>
+                    ${isRentedToday ? '<p class="text-red-600 font-bold mt-2">Alugado Hoje</p>' : rentButtonHTML}
+                </div>
+            `;
+        });
+        kitsHTML += '</div>';
+
+        let rentalsHTML = '';
+        if (currentUser) {
+            rentalsHTML = '<div class="mt-8"> <h4 class="text-2xl font-bold mb-4">Aluguéis Agendados</h4>';
+            if (theme.rentals && theme.rentals.length > 0) {
+                rentalsHTML += '<ul class="list-disc pl-5 space-y-2">';
+                theme.rentals.forEach((rental, index) => {
+                    rentalsHTML += `
+                        <li class="flex justify-between items-center">
+                            <span>Kit <strong>${rental.kit}</strong> de ${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} até ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                            <button class="delete-rental-btn text-red-500 hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">Excluir</button>
+                        </li>
+                    `;
+                });
+                rentalsHTML += '</ul>';
+            } else {
+                rentalsHTML += '<p>Nenhum aluguer agendado para este tema.</p>';
+            }
+            rentalsHTML += '</div>';
+        }
+
+        modalKitsContainer.innerHTML = kitsHTML + rentalsHTML;
+        themeModal.classList.remove('hidden', 'opacity-0');
+        themeModal.querySelector('.modal-content').classList.remove('scale-95');
+    }
+
     function isKitRented(theme, kitKey, checkDate) {
         if (!theme.rentals) return false;
         const date = new Date(checkDate);
@@ -78,55 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function isThemeUnavailableToday(theme) {
         const today = new Date().toISOString().split('T')[0];
         return (theme.kits || []).some(kitKey => isKitRented(theme, kitKey, today));
-    }
-
-
-    // --- FUNÇÕES DE MODAL ---
-    function openThemeModal(theme) {
-        modalThemeName.textContent = theme.name;
-        modalKitsContainer.innerHTML = '';
-        const today = new Date().toISOString().split('T')[0];
-
-        let kitsHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-        (theme.kits || []).forEach(kitKey => {
-            const detail = kitDetails[kitKey];
-            const imageUrl = theme.images?.[kitKey] || theme.coverImage;
-            const isRentedToday = isKitRented(theme, kitKey, today);
-
-            kitsHTML += `
-                <div class="border rounded-lg p-4 text-center ${isRentedToday ? 'bg-gray-200' : ''}">
-                    <img src="${imageUrl}" class="kit-image w-full h-48 object-cover rounded-md mb-4 ${isRentedToday ? 'opacity-50' : 'hover:opacity-80 transition'}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
-                    <h3 class="text-xl font-semibold">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</h3>
-                    <p class="text-lg font-bold ${detail.class.replace('bg-', 'text-').replace('-300', '-600').replace('-400', '-700')}">${detail.price}</p>
-                    ${isRentedToday ?
-                    '<p class="text-red-600 font-bold mt-2">Alugado Hoje</p>' :
-                    `<button class="rent-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-theme-id="${theme.id}" data-kit="${kitKey}">Agendar Aluguer</button>`
-                }
-                </div>
-            `;
-        });
-        kitsHTML += '</div>';
-
-        let rentalsHTML = '<div class="mt-8"> <h4 class="text-2xl font-bold mb-4">Aluguéis Agendados</h4>';
-        if (theme.rentals && theme.rentals.length > 0) {
-            rentalsHTML += '<ul class="list-disc pl-5 space-y-2">';
-            theme.rentals.forEach((rental, index) => {
-                rentalsHTML += `
-                    <li class="flex justify-between items-center">
-                        <span>Kit <strong>${rental.kit}</strong> de ${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} até ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
-                        <button class="delete-rental-btn text-red-500 hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">Excluir</button>
-                    </li>
-                `;
-            });
-            rentalsHTML += '</ul>';
-        } else {
-            rentalsHTML += '<p>Nenhum aluguer agendado para este tema.</p>';
-        }
-        rentalsHTML += '</div>';
-
-        modalKitsContainer.innerHTML = kitsHTML + rentalsHTML;
-        themeModal.classList.remove('hidden', 'opacity-0');
-        themeModal.querySelector('.modal-content').classList.remove('scale-95');
     }
 
     function closeThemeModal() {
@@ -154,39 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rentalModal.classList.add('hidden');
     }
 
-    // --- FUNÇÃO DE EXIBIÇÃO ---
-    function displayThemes(themesToDisplay) {
-        catalogContainer.innerHTML = '';
-        if (themesToDisplay.length === 0 && loadingIndicator.classList.contains('hidden')) {
-            catalogContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 text-xl">Nenhum tema encontrado. Adicione um novo!</p>`;
-        } else {
-            themesToDisplay.forEach(theme => {
-                const unavailable = isThemeUnavailableToday(theme);
-                const kitBadges = (theme.kits || []).map(kitKey => {
-                    const detail = kitDetails[kitKey];
-                    return `<span class="text-xs font-bold mr-2 px-2.5 py-1 rounded-full ${detail.class}">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</span>`;
-                }).join('');
-
-                const themeCardHTML = `
-                    <div class="theme-card bg-white rounded-lg overflow-hidden shadow-md relative" data-theme-id="${theme.id}">
-                        ${unavailable ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold rounded-lg z-10">INDISPONÍVEL HOJE</div>' : ''}
-                        <img src="${theme.coverImage}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${unavailable ? 'opacity-40' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
-                        <div class="p-4 ${unavailable ? 'opacity-40' : ''}">
-                            <h3 class="text-xl font-bold mb-3">${theme.name}</h3>
-                            <div class="flex flex-wrap gap-2">${kitBadges}</div>
-                        </div>
-                        <div class="absolute top-2 right-2 flex gap-2">
-                            <button class="edit-btn bg-yellow-400 text-white p-2 rounded-full hover:bg-yellow-500 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg></button>
-                            <button class="delete-btn bg-red-500 text-white p-2 rounded-full hover:bg-red-600 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/></svg></button>
-                        </div>
-                    </div>
-                `;
-                catalogContainer.innerHTML += themeCardHTML;
-            });
-        }
-    }
-
-    // --- LÓGICA DE EDIÇÃO E EXCLUSÃO (Com Firebase) ---
     function startEditTheme(themeId) {
         const theme = themes.find(t => t.id === themeId);
         if (!theme) return;
@@ -229,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- FILTROS E PESQUISA ---
     function filterAndSearch() {
         const searchTerm = searchInput.value.toLowerCase();
         const activeFilter = filterButtonsContainer.querySelector('.active-filter')?.dataset.kit || 'todos';
@@ -243,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayThemes(filteredThemes);
     }
 
-    // --- EVENT LISTENERS ---
     searchInput.addEventListener('keyup', filterAndSearch);
     filterButtonsContainer.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
@@ -297,7 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LÓGICA DOS FORMULÁRIOS (Com Firebase) ---
     addThemeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const submitButton = addThemeForm.querySelector('button[type="submit"]');
@@ -322,19 +431,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const themeData = {
-                name,
-                coverImage,
-                images,
-                kits: selectedKits
-            };
-            if (editingThemeId) { // Modo Edição
+            const themeData = { name, coverImage, images, kits: selectedKits };
+            if (editingThemeId) {
                 const themeToUpdate = themes.find(t => t.id === editingThemeId);
-                // Mantém os aluguéis existentes ao editar
                 themeData.rentals = themeToUpdate.rentals || [];
                 await themesCollection.doc(editingThemeId).set(themeData);
-            } else { // Modo Criação
-                themeData.rentals = []; // Inicia com aluguéis vazios
+            } else {
+                themeData.rentals = [];
                 await themesCollection.add(themeData);
             }
             addThemeForm.reset();
@@ -369,10 +472,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 await themesCollection.doc(themeId).update({ rentals: updatedRentals });
                 closeRentalModal();
             } catch (error) {
-                console.error("Erro ao agendar kit: ", error);
-                alert("Ocorreu um erro ao agendar o kit.");
+                console.error("Erro ao agendar aluguer: ", error);
+                alert("Ocorreu um erro ao agendar o aluguer.");
             }
         }
     });
 });
-
