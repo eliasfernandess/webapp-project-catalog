@@ -31,9 +31,9 @@
             </button>
         </div>
 
-        <!-- Formulário para Adicionar Novo Tema -->
+        <!-- Formulário para Adicionar/Editar Tema -->
         <section id="addThemeFormContainer" class="hidden mb-8 p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold mb-4 text-center">Cadastrar Novo Tema</h2>
+            <h2 id="formTitle" class="text-2xl font-bold mb-4 text-center">Cadastrar Novo Tema</h2>
             <form id="addThemeForm">
                 <div class="mb-4">
                     <label for="themeName" class="block text-gray-700 font-semibold mb-2">Nome do Tema</label>
@@ -71,7 +71,7 @@
                 <input type="text" id="searchInput" placeholder="Digite o nome do tema..." class="w-full p-3 border border-gray-300 rounded-lg">
             </div>
             <div class="flex items-center justify-center gap-2 flex-wrap" id="filterButtons">
-                <button data-kit="todos" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">Todos</button>
+                <button data-kit="todos" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold active-filter ring-2 ring-blue-500">Todos</button>
                 <button data-kit="bronze" class="px-4 py-2 bg-orange-300 text-orange-900 rounded-lg font-semibold">Bronze</button>
                 <button data-kit="prata" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-semibold">Prata</button>
                 <button data-kit="ouro" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg font-semibold">Ouro</button>
@@ -83,16 +83,37 @@
     </div>
 
     <!-- Modal para Detalhes do Tema -->
-    <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95">
+    <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0 transition-opacity duration-300">
+        <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95 transition-transform duration-300">
             <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl z-10">&times;</button>
             <h2 id="modalThemeName" class="text-3xl font-bold text-center mb-6">Nome do Tema</h2>
-            <div id="modalKitsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            <div id="modalKitsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Modal para Agendamento de Aluguel -->
+    <div id="rentalModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+            <h3 id="rentalThemeInfo" class="text-xl font-bold mb-4">Agendar Aluguel</h3>
+            <form id="rentalForm">
+                <div class="mb-4">
+                    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Data de Início:</label>
+                    <input type="date" id="startDate" name="startDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-6">
+                    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Data de Fim:</label>
+                    <input type="date" id="endDate" name="endDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="closeRentalModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
+                    <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Salvar Aluguel</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Modal para Visualização de Imagem (Lightbox) -->
-    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0">
+    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
         <button id="closeImageModalBtn" class="absolute top-4 right-4 text-white text-5xl font-light z-10">&times;</button>
         <div class="relative">
             <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
