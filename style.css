@@ -1,0 +1,42 @@
+/* Define a fonte principal para todo o corpo da página */
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+
+/* Adiciona um cursor de ponteiro para indicar que os cards são clicáveis */
+.theme-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* Efeito de elevação e sombra quando o mouse passa sobre um card */
+.theme-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para a animação de fade in/out do modal de tema */
+#themeModal {
+    transition: opacity 0.3s ease;
+}
+
+/* Estilos para a animação de zoom in/out do conteúdo do modal de tema */
+.modal-content {
+    transition: transform 0.3s ease;
+}
+
+/* Estilo para o modal de imagem (lightbox) */
+#imageModal {
+    transition: opacity 0.3s ease;
+}
+
+/* Adiciona cursor de "zoom" e efeito de escala nas imagens dos kits */
+#modalKitsContainer img {
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+}
+
+#modalKitsContainer img:hover {
+    transform: scale(1.05);
+}
+
