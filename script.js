@@ -1,7 +1,5 @@
 // --- JAVASCRIPT COM FIREBASE ---
 
-// PASSO IMPORTANTE:
-// Sua configuração do Firebase já está inserida aqui.
 const firebaseConfig = {
     apiKey: "AIzaSyB9rM4TwAhSPU_e96W0xqg1IDYENFup5i8",
     authDomain: "catalogo-de-festas.firebaseapp.com",
@@ -59,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filterAndSearch(); // Atualiza a tela com os novos dados
     }, error => {
         console.error("Erro ao buscar temas: ", error);
-        loadingIndicator.textContent = "Erro ao carregar os temas. Verifique o console.";
+        loadingIndicator.textContent = "Erro ao carregar os temas. Verifique a consola.";
     });
 
 
@@ -79,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function isThemeUnavailableToday(theme) {
-        if (!theme.rentals) return false;
         const today = new Date().toISOString().split('T')[0];
-        return theme.kits.some(kitKey => isKitRented(theme, kitKey, today));
+        // CORREÇÃO: Verifica se `theme.kits` existe antes de o usar.
+        return (theme.kits || []).some(kitKey => isKitRented(theme, kitKey, today));
     }
 
 
@@ -92,9 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().split('T')[0];
 
         let kitsHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-        theme.kits.forEach(kitKey => {
+        // CORREÇÃO: Verifica se `theme.kits` existe antes de o usar.
+        (theme.kits || []).forEach(kitKey => {
             const detail = kitDetails[kitKey];
-            const imageUrl = theme.images[kitKey] || theme.coverImage;
+            const imageUrl = theme.images?.[kitKey] || theme.coverImage;
             const isRentedToday = isKitRented(theme, kitKey, today);
 
             kitsHTML += `
@@ -104,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-lg font-bold ${detail.class.replace('bg-', 'text-').replace('-300', '-600').replace('-400', '-700')}">${detail.price}</p>
                     ${isRentedToday ?
                     '<p class="text-red-600 font-bold mt-2">Alugado Hoje</p>' :
-                    `<button class="rent-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-theme-id="${theme.id}" data-kit="${kitKey}">Agendar Aluguel</button>`
+                    `<button class="rent-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-theme-id="${theme.id}" data-kit="${kitKey}">Agendar Aluguer</button>`
                 }
                 </div>
             `;
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             rentalsHTML += '</ul>';
         } else {
-            rentalsHTML += '<p>Nenhum aluguel agendado para este tema.</p>';
+            rentalsHTML += '<p>Nenhum aluguer agendado para este tema.</p>';
         }
         rentalsHTML += '</div>';
 
@@ -166,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             themesToDisplay.forEach(theme => {
                 const unavailable = isThemeUnavailableToday(theme);
-                const kitBadges = theme.kits.map(kitKey => {
+                // CORREÇÃO: Verifica se `theme.kits` existe antes de o usar.
+                const kitBadges = (theme.kits || []).map(kitKey => {
                     const detail = kitDetails[kitKey];
                     return `<span class="text-xs font-bold mr-2 px-2.5 py-1 rounded-full ${detail.class}">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</span>`;
                 }).join('');
@@ -199,11 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('themeName').value = theme.name;
         document.getElementById('themeCoverImage').value = theme.coverImage;
         addThemeForm.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.checked = theme.kits.includes(cb.value);
+            // CORREÇÃO: Verifica se `theme.kits` existe.
+            cb.checked = (theme.kits || []).includes(cb.value);
         });
         ['Bronze', 'Prata', 'Ouro'].forEach(kitName => {
             const kitKey = kitName.toLowerCase();
-            document.getElementById(`themeImage${kitName}`).value = theme.images[kitKey] || '';
+            // CORREÇÃO: Verifica se `theme.images` existe.
+            document.getElementById(`themeImage${kitName}`).value = theme.images?.[kitKey] || '';
         });
         addThemeFormContainer.classList.remove('hidden');
     }
@@ -212,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Tem certeza que deseja excluir este tema? Esta ação não pode ser desfeita.')) {
             try {
                 await themesCollection.doc(themeId).delete();
-                // A atualização da tela acontece automaticamente pelo onSnapshot
             } catch (error) {
                 console.error("Erro ao excluir tema: ", error);
                 alert("Ocorreu um erro ao excluir o tema.");
@@ -223,14 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function deleteRental(themeId, rentalIndex) {
         const theme = themes.find(t => t.id === themeId);
         if (theme && confirm('Tem certeza que deseja excluir este agendamento?')) {
-            const updatedRentals = [...theme.rentals];
+            const updatedRentals = [...(theme.rentals || [])];
             updatedRentals.splice(rentalIndex, 1);
             try {
                 await themesCollection.doc(themeId).update({ rentals: updatedRentals });
-                // A atualização do modal acontecerá automaticamente pelo onSnapshot
             } catch (error) {
                 console.error("Erro ao excluir aluguel: ", error);
-                alert("Ocorreu um erro ao excluir o aluguel.");
+                alert("Ocorreu um erro ao excluir o aluguer.");
             }
         }
     }
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeFilter = filterButtonsContainer.querySelector('.active-filter')?.dataset.kit || 'todos';
         let filteredThemes = themes;
         if (activeFilter !== 'todos') {
-            filteredThemes = filteredThemes.filter(theme => theme.kits.includes(activeFilter));
+            filteredThemes = filteredThemes.filter(theme => (theme.kits || []).includes(activeFilter));
         }
         if (searchTerm) {
             filteredThemes = filteredThemes.filter(theme => theme.name.toLowerCase().includes(searchTerm));
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const submitButton = addThemeForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        submitButton.textContent = 'Salvando...';
+        submitButton.textContent = 'A salvar...';
 
         formMessage.textContent = '';
         const name = document.getElementById('themeName').value.trim();
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (!name || !coverImage || selectedKits.length === 0) {
-            formMessage.textContent = 'Preencha Nome, Imagem de Capa e selecione/preencha ao menos um kit.';
+            formMessage.textContent = 'Preencha Nome, Imagem de Capa e selecione/preencha pelo menos um kit.';
             submitButton.disabled = false;
             submitButton.textContent = 'Salvar Tema';
             return;
@@ -329,8 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (editingThemeId) { // Modo Edição
-                const themeData = { name, coverImage, images, kits: selectedKits };
-                await themesCollection.doc(editingThemeId).update(themeData);
+                const themeToUpdate = themes.find(t => t.id === editingThemeId);
+                const themeData = { name, coverImage, images, kits: selectedKits, rentals: themeToUpdate.rentals || [] };
+                await themesCollection.doc(editingThemeId).set(themeData);
             } else { // Modo Criação
                 const newTheme = { name, coverImage, images, kits: selectedKits, rentals: [] };
                 await themesCollection.add(newTheme);
@@ -366,12 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await themesCollection.doc(themeId).update({ rentals: updatedRentals });
                 closeRentalModal();
-                // O modal será atualizado automaticamente pelo onSnapshot
             } catch (error) {
-                console.error("Erro ao agendar aluguel: ", error);
-                alert("Ocorreu um erro ao agendar o aluguel.");
+                console.error("Erro ao agendar aluguer: ", error);
+                alert("Ocorreu um erro ao agendar o aluguer.");
             }
         }
     });
 });
-
