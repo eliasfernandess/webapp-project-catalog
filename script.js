@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO PARA MOBILE) ---
+    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO PARA INCLUIR IMAGEM) ---
     closeQuoteModalBtn.addEventListener('click', () => quoteModal.classList.add('hidden'));
 
     quoteForm.addEventListener('submit', (e) => {
@@ -399,19 +399,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDate = document.getElementById('eventDate').value;
         const theme = themes.find(t => t.id === currentQuoteData.themeId);
 
+        // NOVO: Obter a URL da imagem específica do kit
+        const kitImage = theme.images?.[currentQuoteData.kit] || theme.coverImage || '';
+
         // 1. Redirecionar para o WhatsApp IMEDIATAMENTE
-        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        const message = `Olá, meu nome é **${clientName}** e estou entrando em contato através do site **Pegue e Monte**.  
 
-Gostaria de **solicitar um orçamento** para o tema **"${theme.name}" (Kit ${currentQuoteData.kit})**, com data prevista para **${formattedDate}**.  
+        // NOVO: Mensagem atualizada para incluir o link da imagem
+        const message = `Olá, meu nome é *${clientName}* e estou entrando em contato através do site *Pegue e Monte*.  
 
-Segue meu contato para retorno: **${clientPhone}**.  
+Gostaria de *solicitar um orçamento* para o tema *"${theme.name}" (Kit ${currentQuoteData.kit})*, com data prevista para *${formattedDate}*.  
+
+Segue meu contato para retorno: *${clientPhone}*.  
+
+Veja a foto do kit que escolhi: ${kitImage}  
 
 Aguardo seu retorno com as informações completas do orçamento e formas de pagamento.  
 Muito obrigado pela atenção!`;
 
-        // Usar a API oficial do WhatsApp para maior compatibilidade
+
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessPhoneNumber}&text=${encodeURIComponent(message)}`;
 
         window.open(whatsappUrl, '_blank');
@@ -423,10 +430,10 @@ Muito obrigado pela atenção!`;
             eventDate,
             themeName: theme.name,
             kit: currentQuoteData.kit,
+            kitImage: kitImage, // NOVO: Salvar o link da imagem no registo
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'pendente'
         }).catch(error => {
-            // Se falhar, apenas registamos o erro na consola, pois a ação principal (WhatsApp) já funcionou
             console.error("Erro ao salvar solicitação em segundo plano:", error);
         });
 
