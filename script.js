@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const kitImage = theme.images?.[currentQuoteData.kit] || theme.coverImage || '';
 
         // 1. Redirecionar para o WhatsApp IMEDIATAMENTE
-        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
         // NOVO: Mensagem atualizada para incluir o link da imagem
