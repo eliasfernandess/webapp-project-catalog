@@ -389,43 +389,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO) ---
-
+    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO PARA MOBILE) ---
     closeQuoteModalBtn.addEventListener('click', () => quoteModal.classList.add('hidden'));
 
-    quoteForm.addEventListener('submit', async e => {
+    quoteForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const clientName = document.getElementById('clientName').value;
-        const clientPhone = document.getElementById('clientPhone').value; // Coleta o telefone
+        const clientPhone = document.getElementById('clientPhone').value;
         const eventDate = document.getElementById('eventDate').value;
         const theme = themes.find(t => t.id === currentQuoteData.themeId);
 
-        // 1. Salvar na base de dados
-        try {
-            await quotesCollection.add({
-                clientName,
-                clientPhone, // Salva o telefone
-                eventDate,
-                themeName: theme.name,
-                kit: currentQuoteData.kit,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'pendente'
-            });
-        } catch (error) {
-            console.error("Erro ao salvar solicitação:", error);
-            alert("Ocorreu um erro ao enviar o seu pedido. Por favor, tente novamente.");
-            return;
-        }
-
-        // 2. Redirecionar para o WhatsApp
-        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        // 1. Redirecionar para o WhatsApp IMEDIATAMENTE
+        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        // Adiciona o telefone à mensagem
         const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}. Meu nome é ${clientName} e o meu telefone é ${clientPhone}. Aguardo o vosso contacto!`;
-        const whatsappUrl = `https://wa.me/${businessPhoneNumber}?text=${encodeURIComponent(message)}`;
+
+        // Usar a API oficial do WhatsApp para maior compatibilidade
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessPhoneNumber}&text=${encodeURIComponent(message)}`;
 
         window.open(whatsappUrl, '_blank');
 
+        // 2. Salvar na base de dados em SEGUNDO PLANO
+        quotesCollection.add({
+            clientName,
+            clientPhone,
+            eventDate,
+            themeName: theme.name,
+            kit: currentQuoteData.kit,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'pendente'
+        }).catch(error => {
+            // Se falhar, apenas registamos o erro na consola, pois a ação principal (WhatsApp) já funcionou
+            console.error("Erro ao salvar solicitação em segundo plano:", error);
+        });
+
+        // 3. Fechar e limpar o formulário
         quoteModal.classList.add('hidden');
         quoteForm.reset();
         closeModalBtn.click();
