@@ -434,10 +434,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const kitImage = theme.images?.[currentQuoteData.kit] || theme.coverImage || '';
 
-        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-        const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}.\nMeu nome é ${clientName} e o meu telefone é ${clientPhone}.\n\nVeja a foto do kit que escolhi: ${kitImage}\n\nAguardo o vosso contacto!`;
+        // NOVO: Mensagem atualizada para incluir o link da imagem
+        const message = `Olá, meu nome é *${clientName}* e estou entrando em contato através do site *Pegue e Monte*.  
+
+Gostaria de *solicitar um orçamento* para o tema *"${theme.name}" (Kit ${currentQuoteData.kit})*, com data prevista para *${formattedDate}*.  
+
+Segue meu contato para retorno: *${clientPhone}*.  
+
+Veja a foto do kit que escolhi: ${kitImage}  
+
+Aguardo seu retorno com as informações completas do orçamento e formas de pagamento.  
+Muito obrigado pela atenção!`;
 
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessPhoneNumber}&text=${encodeURIComponent(message)}`;
 
