@@ -1,7 +1,4 @@
-// --- JAVASCRIPT COM FIREBASE E AUTENTICAÇÃO (VERSÃO DE DIAGNÓSTICO) ---
-
-// MENSAGEM 1: Confirma que o ficheiro script.js foi carregado.
-console.log("FICHEIRO SCRIPT.JS CARREGADO. A inicializar o Firebase...");
+// --- JAVASCRIPT COM FIREBASE, AUTENTICAÇÃO E ORÇAMENTO ---
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9rM4TwAhSPU_e96W0xqg1IDYENFup5i8",
@@ -17,101 +14,32 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 const themesCollection = db.collection('themes');
-
-// MENSAGEM 2: Confirma que o script está à espera que o HTML seja carregado.
-console.log("A aguardar pelo evento DOMContentLoaded...");
+const quotesCollection = db.collection('solicitacoes');
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // MENSAGEM 3: Esta é a mensagem mais importante. Se esta aparecer, o coração do script está a funcionar.
-    console.log("EVENTO DOMCONTENTLOADED DISPARADO. O SCRIPT PRINCIPAL ESTÁ A EXECUTAR.");
-
     let themes = [];
+    let currentUser = null;
+
     const kitDetails = {
         bronze: { price: 'R$ 150,00', class: 'bg-orange-300 text-orange-900' },
         prata: { price: 'R$ 250,00', class: 'bg-gray-300 text-gray-800' },
         ouro: { price: 'R$ 300,00', class: 'bg-yellow-400 text-yellow-900' }
     };
 
+    // --- ELEMENTOS DA PÁGINA ---
     const choiceScreen = document.getElementById('choiceScreen');
     const loginScreen = document.getElementById('loginScreen');
     const mainContent = document.getElementById('mainContent');
     const customerBtn = document.getElementById('customerBtn');
     const employeeBtn = document.getElementById('employeeBtn');
-
-    // MENSAGEM 4 e 5: Verificam se o JavaScript conseguiu encontrar os botões no HTML.
-    if (customerBtn) {
-        console.log("SUCESSO: Botão 'customerBtn' encontrado no HTML.");
-    } else {
-        console.error("FALHA: Não foi possível encontrar o botão 'customerBtn' no HTML!");
-    }
-    if (employeeBtn) {
-        console.log("SUCESSO: Botão 'employeeBtn' encontrado no HTML.");
-    } else {
-        console.error("FALHA: Não foi possível encontrar o botão 'employeeBtn' no HTML!");
-    }
-
     const backToChoiceBtn = document.getElementById('backToChoiceBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const loginForm = document.getElementById('loginForm');
+    const loginMessage = document.getElementById('loginMessage');
     const adminControls = document.getElementById('adminControls');
+    const addThemeBtn = document.getElementById('addThemeBtn');
     const catalogContainer = document.getElementById('theme-catalog');
-
-    // MENSAGEM 6: Confirma que o script está a tentar adicionar a funcionalidade de clique.
-    console.log("A adicionar os 'event listeners' de clique aos botões.");
-    customerBtn.addEventListener('click', () => {
-        console.log("CLIQUE DETETADO: Botão 'Sou Cliente' foi clicado.");
-        showCatalog(false);
-    });
-    employeeBtn.addEventListener('click', () => {
-        console.log("CLIQUE DETETADO: Botão 'Sou Funcionário' foi clicado.");
-        showLoginScreen();
-    });
-    backToChoiceBtn.addEventListener('click', showChoiceScreen);
-
-    // Ouve mudanças no estado de autenticação (login/logout)
-    auth.onAuthStateChanged(user => {
-        console.log("Estado de autenticação verificado. Utilizador:", user ? user.email : "Nenhum");
-        if (user) {
-            showCatalog(true);
-        } else {
-            showChoiceScreen();
-        }
-    });
-
-    function showChoiceScreen() {
-        console.log("A executar: showChoiceScreen()");
-        choiceScreen.style.display = 'flex';
-        loginScreen.style.display = 'none';
-        mainContent.style.display = 'none';
-    }
-
-    function showLoginScreen() {
-        console.log("A executar: showLoginScreen()");
-        choiceScreen.style.display = 'none';
-        loginScreen.style.display = 'flex';
-        mainContent.style.display = 'none';
-    }
-
-    function showCatalog(isAdmin) {
-        console.log(`A executar: showCatalog(). Modo Admin: ${isAdmin}`);
-        choiceScreen.style.display = 'none';
-        loginScreen.style.display = 'none';
-        mainContent.style.display = 'block';
-
-        if (isAdmin) {
-            adminControls.style.display = 'block';
-            logoutBtn.style.display = 'block';
-        } else {
-            adminControls.style.display = 'none';
-            logoutBtn.style.display = 'none';
-        }
-        filterAndSearch();
-    }
-
-    // O resto do código permanece igual, pode deixar como está.
-    // ... (restante das funções de login, logout, displayThemes, modais, etc.) ...
-
     const searchInput = document.getElementById('searchInput');
     const filterButtonsContainer = document.getElementById('filterButtons');
     const addThemeFormContainer = document.getElementById('addThemeFormContainer');
@@ -130,235 +58,141 @@ document.addEventListener('DOMContentLoaded', () => {
     const rentalForm = document.getElementById('rentalForm');
     const rentalThemeInfo = document.getElementById('rentalThemeInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
-    const loginMessage = document.getElementById('loginMessage');
-    const addThemeBtn = document.getElementById('addThemeBtn');
+
+    // Elementos do Modal de Orçamento
+    const quoteModal = document.getElementById('quoteModal');
+    const closeQuoteModalBtn = document.getElementById('closeQuoteModalBtn');
+    const quoteForm = document.getElementById('quoteForm');
+    const quoteThemeInfo = document.getElementById('quoteThemeInfo');
 
     let editingThemeId = null;
+    let currentRentalData = {};
+    let currentQuoteData = {};
+
+    // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
+
+    auth.onAuthStateChanged(user => {
+        currentUser = user;
+        if (user) {
+            showCatalog(true);
+        } else {
+            showChoiceScreen();
+        }
+    });
+
+    customerBtn.addEventListener('click', () => showCatalog(false));
+    employeeBtn.addEventListener('click', showLoginScreen);
+    backToChoiceBtn.addEventListener('click', showChoiceScreen);
+    logoutBtn.addEventListener('click', () => auth.signOut());
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
+        const email = e.target.email.value;
+        const password = e.target.password.value;
         auth.signInWithEmailAndPassword(email, password)
             .catch(error => {
-                loginMessage.textContent = 'Email ou senha inválidos.';
-                console.error('Erro de login:', error);
+                loginMessage.textContent = "Email ou senha inválidos.";
+                console.error("Erro de login:", error);
             });
     });
 
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut();
-    });
+    function showScreen(screen) {
+        choiceScreen.classList.add('hidden');
+        loginScreen.classList.add('hidden');
+        mainContent.classList.add('hidden');
+        screen.classList.remove('hidden');
+    }
 
-    themesCollection.onSnapshot(snapshot => {
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
-        themes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        filterAndSearch();
-    }, error => {
-        console.error("Erro ao buscar temas: ", error);
-        if (loadingIndicator) loadingIndicator.textContent = "Erro ao carregar os temas.";
-    });
+    function showChoiceScreen() {
+        showScreen(choiceScreen);
+    }
 
-    function displayThemes(themesToDisplay) {
-        const currentUser = auth.currentUser;
+    function showLoginScreen() {
+        showScreen(loginScreen);
+    }
+
+    function showCatalog(isAdmin) {
+        showScreen(mainContent);
+        adminControls.classList.toggle('hidden', !isAdmin);
+        logoutBtn.classList.toggle('hidden', !isAdmin);
+        fetchThemes();
+    }
+
+
+    // --- LÓGICA PRINCIPAL (CRUD, FILTROS, ETC.) ---
+
+    function fetchThemes() {
+        loadingIndicator.classList.remove('hidden');
         catalogContainer.innerHTML = '';
 
-        if (themesToDisplay.length === 0 && loadingIndicator && loadingIndicator.classList.contains('hidden')) {
-            catalogContainer.innerHTML = `<p class="col-span-full text-center text-gray-500 text-xl">Nenhum tema encontrado.</p>`;
-            return;
+        themesCollection.orderBy('name').onSnapshot(snapshot => {
+            themes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            displayThemes(themes);
+            loadingIndicator.classList.add('hidden');
+        }, error => {
+            console.error("Erro ao buscar temas: ", error);
+            loadingIndicator.textContent = "Erro ao carregar temas.";
+        });
+    }
+
+    function displayThemes(themesToDisplay) {
+        catalogContainer.innerHTML = '';
+        if (themesToDisplay.length === 0 && !loadingIndicator.classList.contains('hidden')) {
+            catalogContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum tema encontrado.</p>`;
         }
 
         themesToDisplay.forEach(theme => {
-            if (!theme || !theme.name) {
-                console.warn("Tema inválido encontrado na base de dados, a ignorar:", theme);
-                return;
-            }
-            const unavailable = isThemeUnavailableToday(theme);
-            const kitBadges = (theme.kits || []).map(kitKey => {
-                const detail = kitDetails[kitKey];
-                if (!detail) return '';
-                return `<span class="text-xs font-bold mr-2 px-2.5 py-1 rounded-full ${detail.class}">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</span>`;
-            }).join('');
+            const isRented = theme.rentals && theme.rentals.some(rental => {
+                const today = new Date().toISOString().split('T')[0];
+                return today >= rental.startDate && today <= rental.endDate;
+            });
 
-            const adminButtonsHTML = currentUser ? `
-                <div class="absolute top-2 right-2 flex gap-2">
-                    <button class="edit-btn bg-yellow-400 text-white p-2 rounded-full hover:bg-yellow-500 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg></button>
-                    <button class="delete-btn bg-red-500 text-white p-2 rounded-full hover:bg-red-600 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5.5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/></svg></button>
+            const card = document.createElement('div');
+            card.className = `theme-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer group ${isRented ? 'opacity-50' : ''}`;
+            card.dataset.id = theme.id;
+
+            let availableKitsHtml = (theme.kits || []).map(kit =>
+                `<span class="text-xs font-semibold px-2 py-1 rounded-full ${kitDetails[kit]?.class || ''}">${kit.charAt(0).toUpperCase() + kit.slice(1)}</span>`
+            ).join(' ');
+
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover">
+                    ${isRented ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"><span class="text-white font-bold text-lg">Indisponível</span></div>' : ''}
                 </div>
-            ` : '';
-
-            const themeCardHTML = `
-                <div class="theme-card bg-white rounded-lg overflow-hidden shadow-md relative" data-theme-id="${theme.id}">
-                    ${unavailable ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold rounded-lg z-10">INDISPONÍVEL HOJE</div>' : ''}
-                    <img src="${theme.coverImage}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${unavailable ? 'opacity-40' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
-                    <div class="p-4 ${unavailable ? 'opacity-40' : ''}">
-                        <h3 class="text-xl font-bold mb-3">${theme.name}</h3>
-                        <div class="flex flex-wrap gap-2">${kitBadges}</div>
+                <div class="p-4">
+                    <h3 class="text-lg font-bold truncate">${theme.name}</h3>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        ${availableKitsHtml}
                     </div>
-                    ${adminButtonsHTML}
                 </div>
             `;
-            catalogContainer.innerHTML += themeCardHTML;
+            card.addEventListener('click', () => openThemeModal(theme.id));
+            catalogContainer.appendChild(card);
         });
-    }
-
-    function openThemeModal(theme) {
-        const currentUser = auth.currentUser;
-        modalThemeName.textContent = theme.name;
-        modalKitsContainer.innerHTML = '';
-        const today = new Date().toISOString().split('T')[0];
-
-        let kitsHTML = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-        (theme.kits || []).forEach(kitKey => {
-            const detail = kitDetails[kitKey];
-            const imageUrl = theme.images?.[kitKey] || theme.coverImage;
-            const isRentedToday = isKitRented(theme, kitKey, today);
-
-            const rentButtonHTML = currentUser && !isRentedToday ?
-                `<button class="rent-btn mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-theme-id="${theme.id}" data-kit="${kitKey}">Agendar Aluguer</button>` :
-                '';
-
-            kitsHTML += `
-                <div class="border rounded-lg p-4 text-center ${isRentedToday ? 'bg-gray-200' : ''}">
-                    <img src="${imageUrl}" class="kit-image w-full h-48 object-cover rounded-md mb-4 ${isRentedToday ? 'opacity-50' : 'hover:opacity-80 transition'}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/ffffff?text=Imagem';">
-                    <h3 class="text-xl font-semibold">${kitKey.charAt(0).toUpperCase() + kitKey.slice(1)}</h3>
-                    <p class="text-lg font-bold ${detail.class.replace('bg-', 'text-').replace('-300', '-600').replace('-400', '-700')}">${detail.price}</p>
-                    ${isRentedToday ? '<p class="text-red-600 font-bold mt-2">Alugado Hoje</p>' : rentButtonHTML}
-                </div>
-            `;
-        });
-        kitsHTML += '</div>';
-
-        let rentalsHTML = '';
-        if (currentUser) {
-            rentalsHTML = '<div class="mt-8"> <h4 class="text-2xl font-bold mb-4">Aluguéis Agendados</h4>';
-            if (theme.rentals && theme.rentals.length > 0) {
-                rentalsHTML += '<ul class="list-disc pl-5 space-y-2">';
-                theme.rentals.forEach((rental, index) => {
-                    rentalsHTML += `
-                        <li class="flex justify-between items-center">
-                            <span>Kit <strong>${rental.kit}</strong> de ${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} até ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
-                            <button class="delete-rental-btn text-red-500 hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">Excluir</button>
-                        </li>
-                    `;
-                });
-                rentalsHTML += '</ul>';
-            } else {
-                rentalsHTML += '<p>Nenhum aluguer agendado para este tema.</p>';
-            }
-            rentalsHTML += '</div>';
-        }
-
-        modalKitsContainer.innerHTML = kitsHTML + rentalsHTML;
-        themeModal.classList.remove('hidden', 'opacity-0');
-        themeModal.querySelector('.modal-content').classList.remove('scale-95');
-    }
-
-    function isKitRented(theme, kitKey, checkDate) {
-        if (!theme.rentals) return false;
-        const date = new Date(checkDate);
-        date.setUTCHours(0, 0, 0, 0);
-        return theme.rentals.some(rental => {
-            if (rental.kit !== kitKey) return false;
-            const start = new Date(rental.startDate);
-            const end = new Date(rental.endDate);
-            start.setUTCHours(0, 0, 0, 0);
-            end.setUTCHours(0, 0, 0, 0);
-            return date >= start && date <= end;
-        });
-    }
-
-    function isThemeUnavailableToday(theme) {
-        const today = new Date().toISOString().split('T')[0];
-        return (theme.kits || []).some(kitKey => isKitRented(theme, kitKey, today));
-    }
-
-    function closeThemeModal() {
-        themeModal.classList.add('opacity-0');
-        themeModal.querySelector('.modal-content').classList.add('scale-95');
-        setTimeout(() => { themeModal.classList.add('hidden'); }, 300);
-    }
-    function openImageModal(imageUrl) {
-        lightboxImage.src = imageUrl;
-        imageModal.classList.remove('hidden', 'opacity-0');
-    }
-    function closeImageModal() {
-        imageModal.classList.add('opacity-0');
-        setTimeout(() => { imageModal.classList.add('hidden'); lightboxImage.src = ''; }, 300);
-    }
-    function openRentalModal(themeId, kitKey) {
-        const theme = themes.find(t => t.id === themeId);
-        rentalThemeInfo.textContent = `Agendando o Kit "${kitKey}" para o tema "${theme.name}"`;
-        rentalForm.dataset.themeId = themeId;
-        rentalForm.dataset.kit = kitKey;
-        rentalModal.classList.remove('hidden');
-    }
-    function closeRentalModal() {
-        rentalForm.reset();
-        rentalModal.classList.add('hidden');
-    }
-
-    function startEditTheme(themeId) {
-        const theme = themes.find(t => t.id === themeId);
-        if (!theme) return;
-        editingThemeId = theme.id;
-        formTitle.textContent = "Editando Tema";
-        document.getElementById('themeName').value = theme.name;
-        document.getElementById('themeCoverImage').value = theme.coverImage;
-        addThemeForm.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.checked = (theme.kits || []).includes(cb.value);
-        });
-        ['Bronze', 'Prata', 'Ouro'].forEach(kitName => {
-            const kitKey = kitName.toLowerCase();
-            document.getElementById(`themeImage${kitName}`).value = theme.images?.[kitKey] || '';
-        });
-        addThemeFormContainer.classList.remove('hidden');
-    }
-
-    async function deleteTheme(themeId) {
-        if (confirm('Tem certeza que deseja excluir este tema? Esta ação não pode ser desfeita.')) {
-            try {
-                await themesCollection.doc(themeId).delete();
-            } catch (error) {
-                console.error("Erro ao excluir tema: ", error);
-                alert("Ocorreu um erro ao excluir o tema.");
-            }
-        }
-    }
-
-    async function deleteRental(themeId, rentalIndex) {
-        const theme = themes.find(t => t.id === themeId);
-        if (theme && confirm('Tem certeza que deseja excluir este agendamento?')) {
-            const updatedRentals = [...(theme.rentals || [])];
-            updatedRentals.splice(rentalIndex, 1);
-            try {
-                await themesCollection.doc(themeId).update({ rentals: updatedRentals });
-            } catch (error) {
-                console.error("Erro ao excluir aluguel: ", error);
-                alert("Ocorreu um erro ao excluir o aluguer.");
-            }
-        }
     }
 
     function filterAndSearch() {
         const searchTerm = searchInput.value.toLowerCase();
-        const activeFilter = filterButtonsContainer.querySelector('.active-filter')?.dataset.kit || 'todos';
+        const activeFilter = document.querySelector('.active-filter').dataset.kit;
+
         let filteredThemes = themes;
+
         if (activeFilter !== 'todos') {
-            filteredThemes = filteredThemes.filter(theme => (theme.kits || []).includes(activeFilter));
+            filteredThemes = filteredThemes.filter(theme => theme.kits && theme.kits.includes(activeFilter));
         }
+
         if (searchTerm) {
             filteredThemes = filteredThemes.filter(theme => theme.name.toLowerCase().includes(searchTerm));
         }
+
         displayThemes(filteredThemes);
     }
-
     searchInput.addEventListener('keyup', filterAndSearch);
-    filterButtonsContainer.addEventListener('click', (event) => {
-        if (event.target.tagName === 'BUTTON') {
-            filterButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active-filter', 'ring-2', 'ring-blue-500'));
-            event.target.classList.add('active-filter', 'ring-2', 'ring-blue-500');
+    filterButtonsContainer.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+            document.querySelector('.active-filter').classList.remove('active-filter', 'bg-blue-600', 'text-white', 'ring-2', 'ring-blue-500');
+            e.target.classList.add('active-filter', 'bg-blue-600', 'text-white', 'ring-2', 'ring-blue-500');
             filterAndSearch();
         }
     });
@@ -367,114 +201,235 @@ document.addEventListener('DOMContentLoaded', () => {
         editingThemeId = null;
         formTitle.textContent = "Adicionar Novo Tema";
         addThemeForm.reset();
-        addThemeFormContainer.classList.toggle('hidden');
+        addThemeFormContainer.classList.remove('hidden');
     });
 
-    catalogContainer.addEventListener('click', (event) => {
-        const card = event.target.closest('.theme-card');
-        const editBtn = event.target.closest('.edit-btn');
-        const deleteBtn = event.target.closest('.delete-btn');
-        if (editBtn) {
-            startEditTheme(editBtn.closest('.theme-card').dataset.themeId);
+    addThemeForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        formMessage.textContent = "";
+
+        const name = document.getElementById('themeName').value;
+        const coverImage = document.getElementById('themeCoverImage').value;
+        const kits = Array.from(addThemeForm.querySelectorAll('input[name="kits"]:checked')).map(cb => cb.value);
+        const images = {
+            bronze: document.getElementById('themeImageBronze').value,
+            prata: document.getElementById('themeImagePrata').value,
+            ouro: document.getElementById('themeImageOuro').value,
+        };
+
+        if (kits.length === 0) {
+            formMessage.textContent = "Selecione pelo menos um kit.";
             return;
         }
-        if (deleteBtn) {
-            deleteTheme(deleteBtn.closest('.theme-card').dataset.themeId);
-            return;
-        }
-        if (card) {
-            const theme = themes.find(t => t.id === card.dataset.themeId);
-            if (theme) openThemeModal(theme);
-        }
-    });
 
-    closeModalBtn.addEventListener('click', closeThemeModal);
-    themeModal.addEventListener('click', (event) => { if (event.target === themeModal) closeThemeModal(); });
-    closeImageModalBtn.addEventListener('click', closeImageModal);
-    imageModal.addEventListener('click', (event) => { if (event.target === imageModal) closeImageModal(); });
-    closeRentalModalBtn.addEventListener('click', closeRentalModal);
-
-    modalKitsContainer.addEventListener('click', (event) => {
-        const target = event.target;
-        if (target.closest('.kit-image')) {
-            openImageModal(target.closest('.kit-image').src);
-        }
-        if (target.classList.contains('rent-btn')) {
-            openRentalModal(target.dataset.themeId, target.dataset.kit);
-        }
-        if (target.classList.contains('delete-rental-btn')) {
-            deleteRental(target.dataset.themeId, parseInt(target.dataset.rentalIndex));
-        }
-    });
-
-    addThemeForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const submitButton = addThemeForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.textContent = 'A salvar...';
-
-        formMessage.textContent = '';
-        const name = document.getElementById('themeName').value.trim();
-        const coverImage = document.getElementById('themeCoverImage').value.trim();
-        const selectedKits = Array.from(addThemeForm.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-        const images = {};
-        selectedKits.forEach(kit => {
-            const inputId = `themeImage${kit.charAt(0).toUpperCase() + kit.slice(1)}`;
-            images[kit] = document.getElementById(inputId).value.trim();
-        });
-
-        if (!name || !coverImage || selectedKits.length === 0) {
-            formMessage.textContent = 'Preencha Nome, Imagem de Capa e selecione/preencha pelo menos um kit.';
-            submitButton.disabled = false;
-            submitButton.textContent = 'Salvar Tema';
-            return;
-        }
+        const themeData = { name, coverImage, kits, images, rentals: [] };
 
         try {
-            const themeData = { name, coverImage, images, kits: selectedKits };
             if (editingThemeId) {
-                const themeToUpdate = themes.find(t => t.id === editingThemeId);
-                themeData.rentals = themeToUpdate.rentals || [];
-                await themesCollection.doc(editingThemeId).set(themeData);
+                const themeRef = themesCollection.doc(editingThemeId);
+                const doc = await themeRef.get();
+                const existingRentals = doc.exists ? doc.data().rentals : [];
+                themeData.rentals = existingRentals || [];
+                await themeRef.update(themeData);
             } else {
-                themeData.rentals = [];
                 await themesCollection.add(themeData);
             }
             addThemeForm.reset();
             addThemeFormContainer.classList.add('hidden');
-            editingThemeId = null;
         } catch (error) {
             console.error("Erro ao salvar tema: ", error);
-            alert("Ocorreu um erro ao salvar o tema.");
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Salvar Tema';
+            formMessage.textContent = "Erro ao salvar. Tente novamente.";
         }
     });
 
-    rentalForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const themeId = rentalForm.dataset.themeId;
-        const kit = rentalForm.dataset.kit;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
+    // --- LÓGICA DOS MODAIS ---
 
-        if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
-            alert('Por favor, insira datas válidas.');
+    function openThemeModal(id) {
+        const theme = themes.find(t => t.id === id);
+        if (!theme) return;
+
+        modalThemeName.textContent = theme.name;
+        modalKitsContainer.innerHTML = '';
+
+        (theme.kits || []).forEach(kit => {
+            const kitDiv = document.createElement('div');
+            kitDiv.className = 'mb-6 p-4 border rounded-lg';
+            const kitImage = theme.images?.[kit] || 'https://placehold.co/600x400/e2e8f0/adb5bd?text=Sem+Imagem';
+
+            const today = new Date().toISOString().split('T')[0];
+            const isRented = theme.rentals && theme.rentals.some(r => r.kit === kit && today >= r.startDate && today <= r.endDate);
+
+            kitDiv.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6">
+                    <img src="${kitImage}" alt="Imagem do Kit ${kit}" class="w-full md:w-1/3 rounded-lg shadow-md kit-image" data-src="${kitImage}">
+                    <div class="flex-grow">
+                        <h4 class="text-2xl font-bold capitalize ${kitDetails[kit]?.class} inline-block px-3 py-1 rounded-md">${kit} - ${kitDetails[kit]?.price}</h4>
+                        <div class="mt-4">
+                            <h5 class="font-semibold mb-2">Datas Agendadas:</h5>
+                            <ul class="list-disc list-inside text-sm text-gray-600">
+                                ${theme.rentals && theme.rentals.filter(r => r.kit === kit).length > 0
+                    ? theme.rentals.filter(r => r.kit === kit).map(r => `<li>${new Date(r.startDate).toLocaleDateString()} a ${new Date(r.endDate).toLocaleDateString()}</li>`).join('')
+                    : '<li>Nenhum agendamento.</li>'
+                }
+                            </ul>
+                        </div>
+                        <div class="mt-6 flex flex-wrap gap-4">
+                            <button class="quote-btn whatsapp-btn flex items-center gap-2 bg-green-500 text-white font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                                Solicitar Orçamento
+                            </button>
+                            <!-- Botões de Admin -->
+                            ${currentUser ? `
+                                <button class="rent-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>
+                                <button class="edit-btn bg-yellow-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
+                                <button class="delete-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalKitsContainer.appendChild(kitDiv);
+        });
+
+        themeModal.classList.remove('hidden');
+        setTimeout(() => {
+            themeModal.classList.remove('opacity-0');
+            themeModal.querySelector('.modal-content').classList.remove('scale-95');
+        }, 10);
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+        themeModal.classList.add('opacity-0');
+        themeModal.querySelector('.modal-content').classList.add('scale-95');
+        setTimeout(() => themeModal.classList.add('hidden'), 300);
+    });
+
+    modalKitsContainer.addEventListener('click', e => {
+        const target = e.target;
+        const dataset = target.dataset;
+
+        if (target.classList.contains('kit-image')) {
+            lightboxImage.src = dataset.src;
+            imageModal.classList.remove('hidden');
+            setTimeout(() => imageModal.classList.remove('opacity-0'), 10);
+        }
+        if (target.classList.contains('edit-btn')) {
+            const id = dataset.themeId;
+            const theme = themes.find(t => t.id === id);
+            editingThemeId = id;
+            formTitle.textContent = "Editar Tema";
+            addThemeForm.themeName.value = theme.name;
+            addThemeForm.themeCoverImage.value = theme.coverImage;
+            addThemeForm.querySelectorAll('input[name="kits"]').forEach(cb => {
+                cb.checked = theme.kits.includes(cb.value);
+            });
+            addThemeForm.themeImageBronze.value = theme.images?.bronze || '';
+            addThemeForm.themeImagePrata.value = theme.images?.prata || '';
+            addThemeForm.themeImageOuro.value = theme.images?.ouro || '';
+            addThemeFormContainer.classList.remove('hidden');
+            closeModalBtn.click();
+        }
+        if (target.classList.contains('delete-btn')) {
+            const id = dataset.themeId;
+            if (confirm('Tem a certeza que quer excluir este tema?')) {
+                themesCollection.doc(id).delete();
+                closeModalBtn.click();
+            }
+        }
+        if (target.classList.contains('rent-btn')) {
+            currentRentalData.themeId = dataset.themeId;
+            currentRentalData.kit = dataset.kit;
+            const theme = themes.find(t => t.id === currentRentalData.themeId);
+            rentalThemeInfo.textContent = `Agendar Aluguer: ${theme.name} (Kit ${currentRentalData.kit})`;
+            rentalModal.classList.remove('hidden');
+        }
+        if (target.closest('.quote-btn')) {
+            const button = target.closest('.quote-btn');
+            currentQuoteData.themeId = button.dataset.themeId;
+            currentQuoteData.kit = button.dataset.kit;
+            const theme = themes.find(t => t.id === currentQuoteData.themeId);
+            quoteThemeInfo.textContent = `Solicitar Orçamento: ${theme.name} (Kit ${currentQuoteData.kit})`;
+            quoteModal.classList.remove('hidden');
+        }
+    });
+
+    closeImageModalBtn.addEventListener('click', () => {
+        imageModal.classList.add('opacity-0');
+        setTimeout(() => imageModal.classList.add('hidden'), 300);
+    });
+
+    closeRentalModalBtn.addEventListener('click', () => rentalModal.classList.add('hidden'));
+
+    rentalForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const startDate = e.target.startDate.value;
+        const endDate = e.target.endDate.value;
+
+        if (startDate > endDate) {
+            alert('A data de fim deve ser depois da data de início.');
             return;
         }
 
-        const theme = themes.find(t => t.id === themeId);
-        if (theme) {
-            const newRental = { kit, startDate, endDate };
-            const updatedRentals = theme.rentals ? [...theme.rentals, newRental] : [newRental];
-            try {
-                await themesCollection.doc(themeId).update({ rentals: updatedRentals });
-                closeRentalModal();
-            } catch (error) {
-                console.error("Erro ao agendar aluguer: ", error);
-                alert("Ocorreu um erro ao agendar o aluguer.");
-            }
+        const themeRef = themesCollection.doc(currentRentalData.themeId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const doc = await transaction.get(themeRef);
+                if (!doc.exists) {
+                    throw "Tema não encontrado!";
+                }
+                const rentals = doc.data().rentals || [];
+                rentals.push({ kit: currentRentalData.kit, startDate, endDate });
+                transaction.update(themeRef, { rentals });
+            });
+            rentalModal.classList.add('hidden');
+            closeModalBtn.click();
+        } catch (error) {
+            console.error("Erro no agendamento: ", error);
+            alert("Não foi possível agendar. Tente novamente.");
         }
     });
+
+    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO) ---
+
+    closeQuoteModalBtn.addEventListener('click', () => quoteModal.classList.add('hidden'));
+
+    quoteForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const clientName = document.getElementById('clientName').value;
+        const clientPhone = document.getElementById('clientPhone').value; // Coleta o telefone
+        const eventDate = document.getElementById('eventDate').value;
+        const theme = themes.find(t => t.id === currentQuoteData.themeId);
+
+        // 1. Salvar na base de dados
+        try {
+            await quotesCollection.add({
+                clientName,
+                clientPhone, // Salva o telefone
+                eventDate,
+                themeName: theme.name,
+                kit: currentQuoteData.kit,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'pendente'
+            });
+        } catch (error) {
+            console.error("Erro ao salvar solicitação:", error);
+            alert("Ocorreu um erro ao enviar o seu pedido. Por favor, tente novamente.");
+            return;
+        }
+
+        // 2. Redirecionar para o WhatsApp
+        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        // Adiciona o telefone à mensagem
+        const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}. Meu nome é ${clientName} e o meu telefone é ${clientPhone}. Aguardo o vosso contacto!`;
+        const whatsappUrl = `https://wa.me/${businessPhoneNumber}?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, '_blank');
+
+        quoteModal.classList.add('hidden');
+        quoteForm.reset();
+        closeModalBtn.click();
+    });
+
 });
+

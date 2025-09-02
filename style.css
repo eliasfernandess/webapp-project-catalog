@@ -32,3 +32,12 @@ body {
 .kit-image {
     cursor: pointer;
 }
+
+/* Estilo para o botão do WhatsApp */
+.whatsapp-btn {
+    transition: background-color 0.3s;
+}
+.whatsapp-btn:hover {
+    background-color: #128C7E; /* Cor mais escura do WhatsApp no hover */
+}
+
