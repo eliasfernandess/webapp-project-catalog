@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 2. Redirecionar para o WhatsApp
-        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         // Adiciona o telefone à mensagem
         const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}. Meu nome é ${clientName} e o meu telefone é ${clientPhone}. Aguardo o vosso contacto!`;
