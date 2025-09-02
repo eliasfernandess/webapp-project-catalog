@@ -65,26 +65,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const quoteForm = document.getElementById('quoteForm');
     const quoteThemeInfo = document.getElementById('quoteThemeInfo');
 
+    // NOVO: Elementos da Secção de Relatórios
+    const reportMonthSelect = document.getElementById('reportMonth');
+    const reportYearSelect = document.getElementById('reportYear');
+    const downloadReportBtn = document.getElementById('downloadReportBtn');
+
+
     let editingThemeId = null;
     let currentRentalData = {};
     let currentQuoteData = {};
 
-    // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
+    // --- SETUP INICIAL ---
+    function initialize() {
+        populateYearSelector();
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                showCatalog(true);
+            } else {
+                showChoiceScreen();
+            }
+        });
 
-    auth.onAuthStateChanged(user => {
-        currentUser = user;
-        if (user) {
-            showCatalog(true);
-        } else {
-            showChoiceScreen();
+        customerBtn.addEventListener('click', () => showCatalog(false));
+        employeeBtn.addEventListener('click', showLoginScreen);
+        backToChoiceBtn.addEventListener('click', showChoiceScreen);
+        logoutBtn.addEventListener('click', () => auth.signOut());
+        downloadReportBtn.addEventListener('click', downloadReport);
+    }
+
+    // NOVO: Preenche o seletor de ano dinamicamente
+    function populateYearSelector() {
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= 2023; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            reportYearSelect.appendChild(option);
         }
-    });
+    }
 
-    customerBtn.addEventListener('click', () => showCatalog(false));
-    employeeBtn.addEventListener('click', showLoginScreen);
-    backToChoiceBtn.addEventListener('click', showChoiceScreen);
-    logoutBtn.addEventListener('click', () => auth.signOut());
 
+    // --- LÓGICA DE AUTENTICAÇÃO E NAVEGAÇÃO ---
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = e.target.email.value;
@@ -191,8 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keyup', filterAndSearch);
     filterButtonsContainer.addEventListener('click', e => {
         if (e.target.tagName === 'BUTTON') {
-            document.querySelector('.active-filter').classList.remove('active-filter', 'bg-blue-600', 'text-white', 'ring-2', 'ring-blue-500');
-            e.target.classList.add('active-filter', 'bg-blue-600', 'text-white', 'ring-2', 'ring-blue-500');
+            document.querySelector('.active-filter').classList.remove('active-filter', 'ring-2', 'ring-blue-500');
+            e.target.classList.add('active-filter', 'ring-2', 'ring-blue-500');
             filterAndSearch();
         }
     });
@@ -201,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editingThemeId = null;
         formTitle.textContent = "Adicionar Novo Tema";
         addThemeForm.reset();
-        addThemeFormContainer.classList.remove('hidden');
+        addThemeFormContainer.classList.toggle('hidden');
     });
 
     addThemeForm.addEventListener('submit', async e => {
@@ -222,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const themeData = { name, coverImage, kits, images, rentals: [] };
+        const themeData = { name, coverImage, kits, images };
 
         try {
             if (editingThemeId) {
@@ -232,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 themeData.rentals = existingRentals || [];
                 await themeRef.update(themeData);
             } else {
+                themeData.rentals = [];
                 await themesCollection.add(themeData);
             }
             addThemeForm.reset();
@@ -321,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addThemeForm.themeName.value = theme.name;
             addThemeForm.themeCoverImage.value = theme.coverImage;
             addThemeForm.querySelectorAll('input[name="kits"]').forEach(cb => {
-                cb.checked = theme.kits.includes(cb.value);
+                cb.checked = (theme.kits || []).includes(cb.value);
             });
             addThemeForm.themeImageBronze.value = theme.images?.bronze || '';
             addThemeForm.themeImagePrata.value = theme.images?.prata || '';
@@ -399,25 +422,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDate = document.getElementById('eventDate').value;
         const theme = themes.find(t => t.id === currentQuoteData.themeId);
 
-        // NOVO: Obter a URL da imagem específica do kit
+        // Obter a URL da imagem específica do kit
         const kitImage = theme.images?.[currentQuoteData.kit] || theme.coverImage || '';
 
         // 1. Redirecionar para o WhatsApp IMEDIATAMENTE
-        const businessPhoneNumber = "5534988435876"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
+        const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-        // NOVO: Mensagem atualizada para incluir o link da imagem
-        const message = `Olá, meu nome é *${clientName}* e estou entrando em contato através do site *Pegue e Monte*.  
-
-Gostaria de *solicitar um orçamento* para o tema *"${theme.name}" (Kit ${currentQuoteData.kit})*, com data prevista para *${formattedDate}*.  
-
-Segue meu contato para retorno: *${clientPhone}*.  
-
-Veja a foto do kit que escolhi: ${kitImage}  
-
-Aguardo seu retorno com as informações completas do orçamento e formas de pagamento.  
-Muito obrigado pela atenção!`;
-
+        // Mensagem atualizada para incluir o link da imagem
+        const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}.\nMeu nome é ${clientName} e o meu telefone é ${clientPhone}.\n\nVeja a foto do kit que escolhi: ${kitImage}\n\nAguardo o vosso contacto!`;
 
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessPhoneNumber}&text=${encodeURIComponent(message)}`;
 
@@ -430,7 +443,7 @@ Muito obrigado pela atenção!`;
             eventDate,
             themeName: theme.name,
             kit: currentQuoteData.kit,
-            kitImage: kitImage, // NOVO: Salvar o link da imagem no registo
+            kitImage: kitImage, // Salvar o link da imagem no registo
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'pendente'
         }).catch(error => {
@@ -443,5 +456,66 @@ Muito obrigado pela atenção!`;
         closeModalBtn.click();
     });
 
+    // --- NOVA LÓGICA DE RELATÓRIOS ---
+    async function downloadReport() {
+        const year = reportYearSelect.value;
+        const month = reportMonthSelect.value;
+
+        // Calcula a data de início e fim do mês selecionado
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 1);
+
+        try {
+            // Converte as datas para Timestamps do Firebase
+            const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
+            const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
+
+            // Faz a consulta na base de dados
+            const snapshot = await quotesCollection
+                .where('timestamp', '>=', startTimestamp)
+                .where('timestamp', '<', endTimestamp)
+                .orderBy('timestamp', 'desc')
+                .get();
+
+            if (snapshot.empty) {
+                alert('Nenhuma solicitação de orçamento encontrada para este mês.');
+                return;
+            }
+
+            // Converte os dados para o formato CSV
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome do Cliente,Telefone,Data do Evento,Tema,Kit,Data da Solicitacao\r\n";
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const requestDate = data.timestamp.toDate().toLocaleString('pt-BR');
+                const row = [
+                    `"${data.clientName}"`,
+                    `"${data.clientPhone}"`,
+                    `"${new Date(data.eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`,
+                    `"${data.themeName}"`,
+                    `"${data.kit}"`,
+                    `"${requestDate}"`
+                ].join(',');
+                csvContent += row + "\r\n";
+            });
+
+            // Cria e descarrega o ficheiro
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `relatorio_orcamentos_${year}_${month}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error("Erro ao gerar relatório: ", error);
+            alert("Ocorreu um erro ao gerar o relatório. Tente novamente.");
+        }
+    }
+
+    // Inicializa a aplicação
+    initialize();
 });
 
