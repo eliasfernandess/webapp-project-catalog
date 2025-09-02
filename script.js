@@ -1,4 +1,4 @@
-// --- JAVASCRIPT COM FIREBASE, AUTENTICAÇÃO E ORÇAMENTO ---
+// --- JAVASCRIPT COM FIREBASE, AUTENTICAÇÃO, ORÇAMENTO E RELATÓRIOS DE AGENDAMENTO ---
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9rM4TwAhSPU_e96W0xqg1IDYENFup5i8",
@@ -58,14 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const rentalForm = document.getElementById('rentalForm');
     const rentalThemeInfo = document.getElementById('rentalThemeInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
-
-    // Elementos do Modal de Orçamento
     const quoteModal = document.getElementById('quoteModal');
     const closeQuoteModalBtn = document.getElementById('closeQuoteModalBtn');
     const quoteForm = document.getElementById('quoteForm');
     const quoteThemeInfo = document.getElementById('quoteThemeInfo');
-
-    // NOVO: Elementos da Secção de Relatórios
     const reportMonthSelect = document.getElementById('reportMonth');
     const reportYearSelect = document.getElementById('reportYear');
     const downloadReportBtn = document.getElementById('downloadReportBtn');
@@ -94,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadReportBtn.addEventListener('click', downloadReport);
     }
 
-    // NOVO: Preenche o seletor de ano dinamicamente
     function populateYearSelector() {
         const currentYear = new Date().getFullYear();
         for (let year = currentYear; year >= 2023; year--) {
@@ -282,6 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             const isRented = theme.rentals && theme.rentals.some(r => r.kit === kit && today >= r.startDate && today <= r.endDate);
 
+            // Lógica para decidir qual botão mostrar
+            let actionButtonHtml = '';
+            if (currentUser) { // Se for funcionário, mostra o botão de agendar
+                actionButtonHtml = `<button class="rent-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>`;
+            } else { // Se for cliente, mostra o botão de solicitar orçamento
+                actionButtonHtml = `<button class="quote-btn whatsapp-btn flex items-center gap-2 bg-green-500 text-white font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                                Solicitar Orçamento
+                            </button>`;
+            }
+
             kitDiv.innerHTML = `
                 <div class="flex flex-col md:flex-row gap-6">
                     <img src="${kitImage}" alt="Imagem do Kit ${kit}" class="w-full md:w-1/3 rounded-lg shadow-md kit-image" data-src="${kitImage}">
@@ -291,19 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h5 class="font-semibold mb-2">Datas Agendadas:</h5>
                             <ul class="list-disc list-inside text-sm text-gray-600">
                                 ${theme.rentals && theme.rentals.filter(r => r.kit === kit).length > 0
-                    ? theme.rentals.filter(r => r.kit === kit).map(r => `<li>${new Date(r.startDate).toLocaleDateString()} a ${new Date(r.endDate).toLocaleDateString()}</li>`).join('')
+                    ? theme.rentals.filter(r => r.kit === kit).map(r => `<li><b>${r.clientName || 'Cliente'}</b>: ${new Date(r.startDate).toLocaleDateString()} a ${new Date(r.endDate).toLocaleDateString()}</li>`).join('')
                     : '<li>Nenhum agendamento.</li>'
                 }
                             </ul>
                         </div>
                         <div class="mt-6 flex flex-wrap gap-4">
-                            <button class="quote-btn whatsapp-btn flex items-center gap-2 bg-green-500 text-white font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
-                                Solicitar Orçamento
-                            </button>
-                            <!-- Botões de Admin -->
+                            ${actionButtonHtml}
                             ${currentUser ? `
-                                <button class="rent-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>
                                 <button class="edit-btn bg-yellow-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
                                 <button class="delete-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
                             ` : ''}
@@ -385,6 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rentalForm.addEventListener('submit', async e => {
         e.preventDefault();
+        const clientName = document.getElementById('rentalClientName').value;
+        const clientPhone = document.getElementById('rentalClientPhone').value;
         const startDate = e.target.startDate.value;
         const endDate = e.target.endDate.value;
 
@@ -401,10 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw "Tema não encontrado!";
                 }
                 const rentals = doc.data().rentals || [];
-                rentals.push({ kit: currentRentalData.kit, startDate, endDate });
+                rentals.push({
+                    kit: currentRentalData.kit,
+                    startDate,
+                    endDate,
+                    clientName,
+                    clientPhone
+                });
                 transaction.update(themeRef, { rentals });
             });
             rentalModal.classList.add('hidden');
+            rentalForm.reset();
             closeModalBtn.click();
         } catch (error) {
             console.error("Erro no agendamento: ", error);
@@ -412,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LÓGICA DO MODAL DE ORÇAMENTO (ATUALIZADO PARA INCLUIR IMAGEM) ---
+    // --- LÓGICA DO MODAL DE ORÇAMENTO (CLIENTE) ---
     closeQuoteModalBtn.addEventListener('click', () => quoteModal.classList.add('hidden'));
 
     quoteForm.addEventListener('submit', (e) => {
@@ -422,97 +432,85 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDate = document.getElementById('eventDate').value;
         const theme = themes.find(t => t.id === currentQuoteData.themeId);
 
-        // Obter a URL da imagem específica do kit
         const kitImage = theme.images?.[currentQuoteData.kit] || theme.coverImage || '';
 
-        // 1. Redirecionar para o WhatsApp IMEDIATAMENTE
         const businessPhoneNumber = "5511999999999"; // SUBSTITUA PELO NÚMERO DA SUA LOJA
         const formattedDate = new Date(eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-        // Mensagem atualizada para incluir o link da imagem
         const message = `Olá! Tenho interesse em alugar o tema "${theme.name}" (Kit ${currentQuoteData.kit}) para o dia ${formattedDate}.\nMeu nome é ${clientName} e o meu telefone é ${clientPhone}.\n\nVeja a foto do kit que escolhi: ${kitImage}\n\nAguardo o vosso contacto!`;
 
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessPhoneNumber}&text=${encodeURIComponent(message)}`;
 
         window.open(whatsappUrl, '_blank');
 
-        // 2. Salvar na base de dados em SEGUNDO PLANO
         quotesCollection.add({
             clientName,
             clientPhone,
             eventDate,
             themeName: theme.name,
             kit: currentQuoteData.kit,
-            kitImage: kitImage, // Salvar o link da imagem no registo
+            kitImage: kitImage,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'pendente'
         }).catch(error => {
             console.error("Erro ao salvar solicitação em segundo plano:", error);
         });
 
-        // 3. Fechar e limpar o formulário
         quoteModal.classList.add('hidden');
         quoteForm.reset();
         closeModalBtn.click();
     });
 
-    // --- NOVA LÓGICA DE RELATÓRIOS ---
+    // --- LÓGICA DE RELATÓRIOS (AGENDAMENTOS) ---
     async function downloadReport() {
-        const year = reportYearSelect.value;
-        const month = reportMonthSelect.value;
+        const year = parseInt(reportYearSelect.value, 10);
+        const month = parseInt(reportMonthSelect.value, 10);
 
-        // Calcula a data de início e fim do mês selecionado
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 1);
+        const reportRentals = [];
 
-        try {
-            // Converte as datas para Timestamps do Firebase
-            const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
-            const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
-
-            // Faz a consulta na base de dados
-            const snapshot = await quotesCollection
-                .where('timestamp', '>=', startTimestamp)
-                .where('timestamp', '<', endTimestamp)
-                .orderBy('timestamp', 'desc')
-                .get();
-
-            if (snapshot.empty) {
-                alert('Nenhuma solicitação de orçamento encontrada para este mês.');
-                return;
+        themes.forEach(theme => {
+            if (theme.rentals && theme.rentals.length > 0) {
+                theme.rentals.forEach(rental => {
+                    const rentalStartDate = new Date(rental.startDate);
+                    if (rentalStartDate.getUTCFullYear() === year && rentalStartDate.getUTCMonth() + 1 === month) {
+                        reportRentals.push({
+                            ...rental,
+                            themeName: theme.name
+                        });
+                    }
+                });
             }
+        });
 
-            // Converte os dados para o formato CSV
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nome do Cliente,Telefone,Data do Evento,Tema,Kit,Data da Solicitacao\r\n";
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const requestDate = data.timestamp.toDate().toLocaleString('pt-BR');
-                const row = [
-                    `"${data.clientName}"`,
-                    `"${data.clientPhone}"`,
-                    `"${new Date(data.eventDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`,
-                    `"${data.themeName}"`,
-                    `"${data.kit}"`,
-                    `"${requestDate}"`
-                ].join(',');
-                csvContent += row + "\r\n";
-            });
-
-            // Cria e descarrega o ficheiro
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `relatorio_orcamentos_${year}_${month}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } catch (error) {
-            console.error("Erro ao gerar relatório: ", error);
-            alert("Ocorreu um erro ao gerar o relatório. Tente novamente.");
+        if (reportRentals.length === 0) {
+            alert('Nenhum agendamento encontrado para este mês.');
+            return;
         }
+
+        reportRentals.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Nome do Cliente,Telefone,Tema,Kit,Data de Inicio,Data de Fim\r\n";
+
+        reportRentals.forEach(rental => {
+            const row = [
+                `"${rental.clientName || ''}"`,
+                `"${rental.clientPhone || ''}"`,
+                `"${rental.themeName}"`,
+                `"${rental.kit}"`,
+                `"${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`,
+                `"${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`
+            ].join(',');
+            csvContent += row + "\r\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `relatorio_agendamentos_${year}_${month}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // Inicializa a aplicação

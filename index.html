@@ -61,10 +61,10 @@
                 </button>
             </div>
             
-            <!-- NOVA SECÇÃO: Relatório de Solicitações -->
+            <!-- Secção de Relatório de Agendamentos -->
             <section id="reportSection" class="p-4 sm:p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto border">
-                <h3 class="text-xl sm:text-2xl font-bold mb-4 text-center">Relatório de Orçamentos</h3>
-                <p class="text-center text-gray-600 mb-4">Selecione o mês e o ano para descarregar o relatório de solicitações em formato CSV (Excel).</p>
+                <h3 class="text-xl sm:text-2xl font-bold mb-4 text-center">Relatório de Agendamentos</h3>
+                <p class="text-center text-gray-600 mb-4">Selecione o mês e o ano para descarregar o relatório de agendamentos em formato CSV (Excel).</p>
                 <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
                     <select id="reportMonth" class="p-3 border border-gray-300 rounded-lg">
                         <option value="1">Janeiro</option>
@@ -148,21 +148,30 @@
             <div id="modalKitsContainer"></div>
         </div>
     </div>
+    <!-- Modal de Agendamento (Atualizado com campos de cliente) -->
     <div id="rentalModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
         <div class="bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
             <h3 id="rentalThemeInfo" class="text-xl font-bold mb-4">Agendar Aluguer</h3>
             <form id="rentalForm">
                 <div class="mb-4">
-                    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Data de Início:</label>
+                    <label for="rentalClientName" class="block text-gray-700 font-semibold mb-2">Nome do Cliente:</label>
+                    <input type="text" id="rentalClientName" name="rentalClientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="rentalClientPhone" class="block text-gray-700 font-semibold mb-2">Telefone do Cliente:</label>
+                    <input type="tel" id="rentalClientPhone" name="rentalClientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Data de Início do Aluguer:</label>
                     <input type="date" id="startDate" name="startDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="mb-6">
-                    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Data de Fim:</label>
+                    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Data de Fim do Aluguer:</label>
                     <input type="date" id="endDate" name="endDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="flex justify-end gap-4">
                     <button type="button" id="closeRentalModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Salvar Aluguer</button>
+                    <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Salvar Agendamento</button>
                 </div>
             </form>
         </div>
