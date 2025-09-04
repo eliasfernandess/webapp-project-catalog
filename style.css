@@ -41,3 +41,8 @@ body {
     background-color: #128C7E; /* Cor mais escura do WhatsApp no hover */
 }
 
+/* Garante que o conteúdo principal ocupe o espaço disponível, empurrando o rodapé para baixo */
+.flex-grow {
+    flex-grow: 1;
+}
+
