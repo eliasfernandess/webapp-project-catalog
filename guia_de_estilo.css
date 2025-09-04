@@ -1,0 +1,23 @@
+:root {
+  /* Altere os códigos HEX (#...) abaixo para mudar as cores do site */
+
+  /* Cores Principais */
+  --cor-primaria: #2563eb;       /* Azul: Usado em botões principais, filtros ativos */
+  --cor-secundaria: #16a34a;    /* Verde: Usado em botões de sucesso e WhatsApp */
+  --cor-destaque: #f59e0b;      /* Amarelo/Laranja: Usado para ênfase, como nos kits */
+
+  /* Cores de Fundo */
+  --cor-fundo: #f9fafb;         /* Cinzento muito claro: Fundo geral do site */
+  --cor-surface: #ffffff;      /* Branco: Fundo de cartões, modais e cabeçalho */
+
+  /* Cores de Texto */
+  --cor-texto-principal: #1f2937; /* Cinzento escuro: Texto principal */
+  --cor-texto-secundario: #6b7280;/* Cinzento médio: Subtítulos e texto de apoio */
+  --cor-texto-invertido: #ffffff;  /* Branco: Texto sobre fundos coloridos */
+  --cor-texto-link: #1d4ed8;       /* Azul escuro: Para links futuros */
+
+  /* Cores de Feedback */
+  --cor-sucesso: #22c55e;       /* Verde: Mensagens de sucesso */
+  --cor-erro: #ef4444;           /* Vermelho: Mensagens de erro */
+  --cor-aviso: #eab308;          /* Amarelo: Mensagens de aviso */
+}

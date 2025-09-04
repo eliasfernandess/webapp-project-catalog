@@ -31,13 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginScreen = document.getElementById('loginScreen');
     const mainContent = document.getElementById('mainContent');
 
-    // Elementos do Cabeçalho (Desktop)
+    // Elementos do Cabeçalho
     const homeLink = document.getElementById('homeLink');
     const loginLink = document.getElementById('loginLink');
     const adminPanelLink = document.getElementById('adminPanelLink');
     const logoutBtn = document.getElementById('logoutBtn');
-
-    // Elementos do Cabeçalho (Mobile)
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileHomeLink = document.getElementById('mobileHomeLink');
@@ -50,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminControls = document.getElementById('adminControls');
     const addThemeBtn = document.getElementById('addThemeBtn');
     const catalogContainer = document.getElementById('theme-catalog');
+    const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
     const filterButtonsContainer = document.getElementById('filterButtons');
     const addThemeFormContainer = document.getElementById('addThemeFormContainer');
@@ -76,7 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportMonthSelect = document.getElementById('reportMonth');
     const reportYearSelect = document.getElementById('reportYear');
     const downloadReportBtn = document.getElementById('downloadReportBtn');
-
+    const alertModal = document.getElementById('alertModal');
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    const closeAlertBtn = document.getElementById('closeAlertBtn');
 
     let editingThemeId = null;
     let currentRentalData = {};
@@ -92,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchThemes();
         });
 
+        // Listeners de navegação e filtros
         [loginLink, mobileLoginLink].forEach(el => el.addEventListener('click', showLoginScreen));
         [homeLink, mobileHomeLink, adminPanelLink, mobileAdminPanelLink].forEach(el => el.addEventListener('click', showCatalog));
         [logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', () => auth.signOut()));
@@ -103,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         downloadReportBtn.addEventListener('click', downloadReport);
         categoryFilter.addEventListener('change', filterAndSearch);
+        searchInput.addEventListener('keyup', filterAndSearch);
+        closeAlertBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
     }
 
     function populateDateSelectors() {
@@ -131,23 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DE NAVEGAÇÃO E UI ---
 
     function updateUIBasedOnAuthState(user) {
-        if (user) {
-            loginLink.classList.add('hidden');
-            adminPanelLink.classList.remove('hidden');
-            logoutBtn.classList.remove('hidden');
-            mobileLoginLink.classList.add('hidden');
-            mobileAdminPanelLink.classList.remove('hidden');
-            mobileLogoutBtn.classList.remove('hidden');
-            adminControls.classList.remove('hidden');
-        } else {
-            loginLink.classList.remove('hidden');
-            adminPanelLink.classList.add('hidden');
-            logoutBtn.classList.add('hidden');
-            mobileLoginLink.classList.remove('hidden');
-            mobileAdminPanelLink.classList.add('hidden');
-            mobileLogoutBtn.classList.add('hidden');
-            adminControls.classList.add('hidden');
-        }
+        const isAdmin = !!user;
+        loginLink.classList.toggle('hidden', isAdmin);
+        adminPanelLink.classList.toggle('hidden', !isAdmin);
+        logoutBtn.classList.toggle('hidden', !isAdmin);
+        mobileLoginLink.classList.toggle('hidden', isAdmin);
+        mobileAdminPanelLink.classList.toggle('hidden', !isAdmin);
+        mobileLogoutBtn.classList.toggle('hidden', !isAdmin);
+        adminControls.classList.toggle('hidden', !isAdmin);
         showCatalog();
     }
 
@@ -216,14 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayThemes(themesToDisplay) {
         catalogContainer.innerHTML = '';
         if (themesToDisplay.length === 0 && !loadingIndicator.classList.contains('hidden')) {
-            catalogContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum tema encontrado para os filtros selecionados.</p>`;
+            catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
         }
 
         themesToDisplay.forEach(theme => {
             const isRentedToday = isThemeRentedOnDate(theme, new Date().toISOString().split('T')[0]);
 
             const card = document.createElement('div');
-            card.className = `theme-card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer group`;
+            card.className = `theme-card bg-surface rounded-lg shadow-md overflow-hidden cursor-pointer group`;
             card.dataset.id = theme.id;
 
             let availableKitsHtml = (theme.kits || []).map(kit =>
@@ -233,11 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="relative">
                     <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
-                    ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-white font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
+                    ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
                 </div>
                 <div class="p-4">
-                    <h3 class="text-lg font-bold truncate">${theme.name}</h3>
-                    <p class="text-sm text-gray-500 mb-2">${theme.category || 'Sem Categoria'}</p>
+                    <h3 class="text-lg font-bold truncate text-texto-principal">${theme.name}</h3>
+                    <p class="text-sm text-texto-secundario mb-2">${theme.category || 'Sem Categoria'}</p>
                     <div class="flex flex-wrap gap-2 mt-2">
                         ${availableKitsHtml}
                     </div>
@@ -249,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function filterAndSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
         const activeCategory = categoryFilter.value;
         const activeKit = document.querySelector('.active-filter').dataset.kit;
 
@@ -262,13 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredThemes = filteredThemes.filter(theme => theme.kits && theme.kits.includes(activeKit));
         }
 
+        if (searchTerm) {
+            filteredThemes = filteredThemes.filter(theme =>
+                theme.name.toLowerCase().includes(searchTerm) ||
+                (theme.category && theme.category.toLowerCase().includes(searchTerm))
+            );
+        }
+
         displayThemes(filteredThemes);
     }
 
     filterButtonsContainer.addEventListener('click', e => {
         if (e.target.tagName === 'BUTTON') {
-            document.querySelector('.active-filter').classList.remove('active-filter', 'ring-2', 'ring-blue-500');
-            e.target.classList.add('active-filter', 'ring-2', 'ring-blue-500');
+            document.querySelector('.active-filter').classList.remove('active-filter');
+            e.target.classList.add('active-filter');
             filterAndSearch();
         }
     });
@@ -322,12 +326,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LÓGICA DOS MODAIS E REGRAS DE ALUGUER ---
 
+    function showAlert(message, title = 'Aviso') {
+        alertTitle.textContent = title;
+        alertMessage.textContent = message;
+        alertModal.classList.remove('hidden');
+    }
+
     function isThemeRentedOnDate(theme, checkStartDate, checkEndDate = null) {
         if (!theme.rentals || theme.rentals.length === 0) return false;
-
         const startCheck = new Date(checkStartDate + 'T00:00:00');
         const endCheck = checkEndDate ? new Date(checkEndDate + 'T00:00:00') : startCheck;
-
         return theme.rentals.some(rental => {
             const rentalStart = new Date(rental.startDate + 'T00:00:00');
             const rentalEnd = new Date(rental.endDate + 'T00:00:00');
@@ -349,10 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let actionButtonHtml = '';
             if (currentUser) {
-                actionButtonHtml = `<button class="rent-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>`;
+                actionButtonHtml = `<button class="rent-btn bg-primaria hover:bg-blue-700 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>`;
             } else {
-                actionButtonHtml = `<button class="quote-btn whatsapp-btn flex items-center gap-2 bg-green-500 text-white font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                actionButtonHtml = `<button class="quote-btn whatsapp-btn flex items-center gap-2 bg-secundaria text-texto-invertido font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
                     Solicitar Orçamento
                 </button>`;
             }
@@ -365,8 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="mt-6 flex flex-wrap gap-4">
                             ${actionButtonHtml}
                             ${currentUser ? `
-                                <button class="edit-btn bg-yellow-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
-                                <button class="delete-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
+                                <button class="edit-btn bg-destaque hover:bg-yellow-500 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
+                                <button class="delete-btn bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
                             ` : ''}
                         </div>
                     </div>
@@ -382,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalKitsContainer.appendChild(rentalsTitle);
 
             const rentalsList = document.createElement('ul');
-            rentalsList.className = 'list-disc list-inside text-sm text-gray-600 space-y-2';
+            rentalsList.className = 'list-disc list-inside text-sm text-texto-secundario space-y-2';
             theme.rentals.forEach((rental, index) => {
                 const listItem = document.createElement('li');
                 listItem.className = 'flex justify-between items-center';
@@ -391,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <b>${rental.clientName || 'Cliente'}</b> (Kit ${rental.kit}): 
                         ${new Date(rental.startDate).toLocaleDateString()} a ${new Date(rental.endDate).toLocaleDateString()}
                     </span>
-                    <button class="delete-rental-btn text-red-500 hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">
+                    <button class="delete-rental-btn text-erro hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">
                         Excluir
                     </button>
                 `;
@@ -485,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const endDate = e.target.endDate.value;
 
         if (startDate > endDate) {
-            alert('A data de fim deve ser depois da data de início.');
+            showAlert('A data de fim deve ser depois da data de início.', 'Data Inválida');
             return;
         }
 
@@ -498,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const themeData = doc.data();
 
                 if (isThemeRentedOnDate(themeData, startDate, endDate)) {
-                    alert('Este tema já está agendado para este período. Por favor, verifique as datas.');
+                    showAlert('Este tema já está agendado para este período. Por favor, verifique as datas.', 'Conflito de Agendamento');
                     throw "Conflito de agendamento!";
                 }
 
@@ -518,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Erro no agendamento: ", error);
             if (error !== "Conflito de agendamento!") {
-                alert("Não foi possível agendar. Tente novamente.");
+                showAlert("Não foi possível agendar. Tente novamente.", "Erro");
             }
         }
     });
@@ -533,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const theme = themes.find(t => t.id === currentQuoteData.themeId);
 
         if (isThemeRentedOnDate(theme, eventDate)) {
-            alert(`O tema "${theme.name}" não está disponível para a data selecionada. Por favor, escolha outra data.`);
+            showAlert(`O tema "${theme.name}" não está disponível para a data selecionada. Por favor, escolha outra data.`);
             return;
         }
 
@@ -593,7 +601,7 @@ Muito obrigado pela atenção!`;
         });
 
         if (reportRentals.length === 0) {
-            alert('Nenhum agendamento encontrado para este mês.');
+            showAlert('Nenhum agendamento encontrado para este mês.');
             return;
         }
 
@@ -641,7 +649,7 @@ Muito obrigado pela atenção!`;
 
         } catch (error) {
             console.error("Erro ao excluir agendamento:", error);
-            alert("Não foi possível excluir o agendamento. Tente novamente.");
+            showAlert("Não foi possível excluir o agendamento. Tente novamente.", "Erro");
         }
     }
 

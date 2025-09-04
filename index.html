@@ -7,117 +7,127 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Ligar aos novos ficheiros de estilo -->
+    <link rel="stylesheet" href="guia_de_estilo.css">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- NOVO: Configuração do Tailwind para usar as nossas cores personalizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primaria': 'var(--cor-primaria)',
+                        'secundaria': 'var(--cor-secundaria)',
+                        'destaque': 'var(--cor-destaque)',
+                        'fundo': 'var(--cor-fundo)',
+                        'surface': 'var(--cor-surface)',
+                        'texto-principal': 'var(--cor-texto-principal)',
+                        'texto-secundario': 'var(--cor-texto-secundario)',
+                        'texto-invertido': 'var(--cor-texto-invertido)',
+                        'sucesso': 'var(--cor-sucesso)',
+                        'erro': 'var(--cor-erro)',
+                        'aviso': 'var(--cor-aviso)',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen">
 
-    <!-- NOVO: Cabeçalho Fixo e Responsivo -->
-    <header id="appHeader" class="bg-white shadow-md sticky top-0 z-20">
+    <!-- Cabeçalho Fixo e Responsivo -->
+    <header id="appHeader" class="bg-surface shadow-md sticky top-0 z-20">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
                 <div class="flex-shrink-0">
                     <img class="h-12" src="https://placehold.co/150x75/000000/FFFFFF?text=Sua+Logo" alt="Logo da Empresa">
                 </div>
-
-                <!-- Menu Desktop -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#" id="homeLink" class="text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Catálogo</a>
-                        <a href="#" id="loginLink" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium">Área Restrita</a>
-                        <a href="#" id="adminPanelLink" class="hidden text-gray-700 hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Painel Admin</a>
-                        <a href="#" id="logoutBtn" class="hidden bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Sair</a>
+                        <a href="#" id="homeLink" class="text-texto-principal hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Catálogo</a>
+                        <a href="#" id="loginLink" class="bg-secundaria hover:bg-green-600 text-texto-invertido px-4 py-2 rounded-md text-sm font-medium">Área Restrita</a>
+                        <a href="#" id="adminPanelLink" class="hidden text-texto-principal hover:bg-gray-200 px-3 py-2 rounded-md text-sm font-medium">Painel Admin</a>
+                        <a href="#" id="logoutBtn" class="hidden bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-md text-sm font-medium">Sair</a>
                     </div>
                 </div>
-
-                <!-- Botão do Menu Mobile -->
                 <div class="-mr-2 flex md:hidden">
                     <button id="mobileMenuBtn" type="button" class="bg-gray-200 inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-200 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Abrir menu principal</span>
-                        <!-- Ícone Hamburger -->
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <!-- Ícone 'X' para fechar -->
-                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
         </nav>
-
-        <!-- Menu Mobile (oculto por defeito) -->
         <div class="hidden md:hidden" id="mobileMenu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                 <a href="#" id="mobileHomeLink" class="text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">Catálogo</a>
-                 <a href="#" id="mobileLoginLink" class="bg-green-500 text-white block px-3 py-2 rounded-md text-base font-medium">Área Restrita</a>
-                 <a href="#" id="mobileAdminPanelLink" class="hidden text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">Painel Admin</a>
-                 <a href="#" id="mobileLogoutBtn" class="hidden bg-red-500 text-white block px-3 py-2 rounded-md text-base font-medium">Sair</a>
+                 <a href="#" id="mobileHomeLink" class="text-texto-principal hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">Catálogo</a>
+                 <a href="#" id="mobileLoginLink" class="bg-secundaria text-texto-invertido block px-3 py-2 rounded-md text-base font-medium">Área Restrita</a>
+                 <a href="#" id="mobileAdminPanelLink" class="hidden text-texto-principal hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">Painel Admin</a>
+                 <a href="#" id="mobileLogoutBtn" class="hidden bg-erro text-texto-invertido block px-3 py-2 rounded-md text-base font-medium">Sair</a>
             </div>
         </div>
     </header>
 
-    <!-- Ecrã de Login para Funcionários (agora gerido como uma página separada) -->
+    <!-- Ecrã de Login -->
     <div id="loginScreen" class="hidden flex-grow flex-col items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white p-6 sm:p-8 rounded-lg shadow-xl">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-6">Acesso Restrito</h2>
+        <div class="w-full max-w-md bg-surface p-6 sm:p-8 rounded-lg shadow-xl">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-texto-principal mb-6">Acesso Restrito</h2>
             <form id="loginForm">
                  <div class="mb-4">
-                    <label for="email" class="block text-gray-700 font-semibold mb-2">Email</label>
+                    <label for="email" class="block text-texto-secundario font-semibold mb-2">Email</label>
                     <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-lg" required>
                 </div>
                 <div class="mb-6">
-                    <label for="password" class="block text-gray-700 font-semibold mb-2">Senha</label>
+                    <label for="password" class="block text-texto-secundario font-semibold mb-2">Senha</label>
                     <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg" required>
                 </div>
-                <div id="loginMessage" class="text-red-600 text-center mb-4 font-semibold"></div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">Entrar</button>
+                <div id="loginMessage" class="text-erro text-center mb-4 font-semibold"></div>
+                <button type="submit" class="w-full bg-primaria hover:bg-blue-700 text-texto-invertido font-bold py-3 px-4 rounded-lg transition">Entrar</button>
             </form>
         </div>
     </div>
 
     <!-- Conteúdo Principal do Catálogo -->
     <div id="mainContent" class="container mx-auto p-4 md:p-8 flex-grow">
-        <!-- O painel de admin foi movido para aqui, mas continua oculto por defeito -->
         <div id="adminControls" class="hidden mb-8 space-y-8">
             <div class="text-center">
-                <button id="addThemeBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md text-base sm:text-lg">
+                <button id="addThemeBtn" class="bg-secundaria hover:bg-green-600 text-texto-invertido font-bold py-3 px-6 rounded-lg transition shadow-md text-base sm:text-lg">
                     + Adicionar Novo Tema
                 </button>
             </div>
-            <section id="reportSection" class="p-4 sm:p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto border">
+            <section id="reportSection" class="p-4 sm:p-6 bg-surface rounded-lg shadow-md max-w-2xl mx-auto border">
                 <h3 class="text-xl sm:text-2xl font-bold mb-4 text-center">Relatório de Agendamentos</h3>
-                <p class="text-center text-gray-600 mb-4">Selecione o mês e o ano para descarregar o relatório.</p>
+                <p class="text-center text-texto-secundario mb-4">Selecione o mês e o ano para descarregar o relatório.</p>
                 <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
                     <select id="reportMonth" class="p-3 border border-gray-300 rounded-lg"></select>
                     <select id="reportYear" class="p-3 border border-gray-300 rounded-lg"></select>
-                    <button id="downloadReportBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md">Descarregar</button>
+                    <button id="downloadReportBtn" class="bg-sky-500 hover:bg-sky-600 text-texto-invertido font-bold py-3 px-6 rounded-lg transition shadow-md">Descarregar</button>
                 </div>
             </section>
         </div>
         
-        <section id="addThemeFormContainer" class="hidden mb-8 p-4 sm:p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
+        <section id="addThemeFormContainer" class="hidden mb-8 p-4 sm:p-6 bg-surface rounded-lg shadow-md max-w-2xl mx-auto">
              <h2 id="formTitle" class="text-xl sm:text-2xl font-bold mb-4 text-center">Cadastrar Novo Tema</h2>
             <form id="addThemeForm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="mb-4">
-                        <label for="themeName" class="block text-gray-700 font-semibold mb-2">Nome do Tema</label>
+                        <label for="themeName" class="block text-texto-secundario font-semibold mb-2">Nome do Tema</label>
                         <input type="text" id="themeName" name="themeName" class="w-full p-3 border border-gray-300 rounded-lg" required>
                     </div>
                     <div class="mb-4">
-                        <label for="themeCategory" class="block text-gray-700 font-semibold mb-2">Categoria</label>
+                        <label for="themeCategory" class="block text-texto-secundario font-semibold mb-2">Categoria</label>
                         <input type="text" id="themeCategory" name="themeCategory" list="categoryList" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Ex: Infantil, Casamento...">
                         <datalist id="categoryList"></datalist>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label for="themeCoverImage" class="block text-gray-700 font-semibold mb-2">URL da Imagem de Capa</label>
+                    <label for="themeCoverImage" class="block text-texto-secundario font-semibold mb-2">URL da Imagem de Capa</label>
                     <input type="url" id="themeCoverImage" name="themeCoverImage" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Imagem principal que aparece no catálogo" required>
                 </div>
                 <div class="mb-6 p-4 border border-gray-200 rounded-lg">
-                    <label class="block text-gray-700 font-semibold mb-2">Kits e Imagens Específicas</label>
+                    <label class="block text-texto-secundario font-semibold mb-2">Kits e Imagens Específicas</label>
                     <div class="space-y-3">
                         <div>
                             <label class="flex items-center"><input type="checkbox" name="kits" value="bronze" class="h-4 w-4 mr-2 kit-checkbox"> Bronze</label>
@@ -133,19 +143,23 @@
                         </div>
                     </div>
                 </div>
-                <div id="formMessage" class="text-red-600 text-center mb-4 font-semibold"></div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">Salvar Tema</button>
+                <div id="formMessage" class="text-erro text-center mb-4 font-semibold"></div>
+                <button type="submit" class="w-full bg-primaria hover:bg-blue-700 text-texto-invertido font-bold py-3 px-4 rounded-lg transition">Salvar Tema</button>
             </form>
         </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 p-4 bg-white rounded-lg shadow-sm">
+        <!-- Barra de Filtros Completa -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 p-4 bg-surface rounded-lg shadow-sm">
+            <div class="md:col-span-2">
+                 <input type="text" id="searchInput" placeholder="Pesquisar por nome ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg">
+            </div>
             <div class="md:col-span-1">
                 <select id="categoryFilter" class="w-full p-3 border border-gray-300 rounded-lg">
                     <option value="todas">Todas as Categorias</option>
                 </select>
             </div>
             <div class="md:col-span-2 flex items-center justify-center gap-2 flex-wrap" id="filterButtons">
-                <button data-kit="todos" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold active-filter ring-2 ring-blue-500">Todos os Kits</button>
+                <button data-kit="todos" class="px-4 py-2 bg-primaria text-texto-invertido rounded-lg font-semibold active-filter">Todos os Kits</button>
                 <button data-kit="bronze" class="px-4 py-2 bg-orange-300 text-orange-900 rounded-lg font-semibold">Bronze</button>
                 <button data-kit="prata" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-semibold">Prata</button>
                 <button data-kit="ouro" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg font-semibold">Ouro</button>
@@ -153,67 +167,67 @@
         </div>
         
         <div id="loadingIndicator" class="text-center py-10">
-            <p class="text-lg text-gray-500">A carregar temas...</p>
+            <p class="text-lg text-texto-secundario">A carregar temas...</p>
         </div>
 
         <main id="theme-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8"></main>
     </div>
 
-    <!-- Modals (o HTML dos modals permanece o mesmo) -->
+    <!-- Modals -->
     <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0 transition-opacity duration-300">
-        <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95 transition-transform duration-300">
-            <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl z-10">&times;</button>
+        <div class="modal-content bg-surface rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95 transition-transform duration-300">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-3xl z-10">&times;</button>
             <h2 id="modalThemeName" class="text-2xl sm:text-3xl font-bold text-center mb-6">Nome do Tema</h2>
             <div id="modalKitsContainer"></div>
         </div>
     </div>
     <div id="rentalModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
-        <div class="bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
+        <div class="bg-surface rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
             <h3 id="rentalThemeInfo" class="text-xl font-bold mb-4">Agendar Aluguer</h3>
             <form id="rentalForm">
                 <div class="mb-4">
-                    <label for="rentalClientName" class="block text-gray-700 font-semibold mb-2">Nome do Cliente:</label>
-                    <input type="text" id="rentalClientName" name="rentalClientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="rentalClientName" class="block text-texto-secundario font-semibold mb-2">Nome do Cliente:</label>
+                    <input type="text" id="rentalClientName" name="rentalClientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="mb-4">
-                    <label for="rentalClientPhone" class="block text-gray-700 font-semibold mb-2">Telefone do Cliente:</label>
-                    <input type="tel" id="rentalClientPhone" name="rentalClientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="rentalClientPhone" class="block text-texto-secundario font-semibold mb-2">Telefone do Cliente:</label>
+                    <input type="tel" id="rentalClientPhone" name="rentalClientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="mb-4">
-                    <label for="startDate" class="block text-gray-700 font-semibold mb-2">Data de Início do Aluguer:</label>
-                    <input type="date" id="startDate" name="startDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="startDate" class="block text-texto-secundario font-semibold mb-2">Data de Início do Aluguer:</label>
+                    <input type="date" id="startDate" name="startDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="mb-6">
-                    <label for="endDate" class="block text-gray-700 font-semibold mb-2">Data de Fim do Aluguer:</label>
-                    <input type="date" id="endDate" name="endDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="endDate" class="block text-texto-secundario font-semibold mb-2">Data de Fim do Aluguer:</label>
+                    <input type="date" id="endDate" name="endDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="flex justify-end gap-4">
                     <button type="button" id="closeRentalModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">Salvar Agendamento</button>
+                    <button type="submit" class="bg-secundaria text-texto-invertido px-6 py-2 rounded-lg hover:bg-green-600">Salvar Agendamento</button>
                 </div>
             </form>
         </div>
     </div>
     <div id="quoteModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
-        <div class="bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
+        <div class="bg-surface rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
             <h3 id="quoteThemeInfo" class="text-xl font-bold mb-2">Solicitar Orçamento</h3>
-            <p class="text-gray-600 mb-4">Preencha os seus dados para continuar no WhatsApp.</p>
+            <p class="text-texto-secundario mb-4">Preencha os seus dados para continuar no WhatsApp.</p>
             <form id="quoteForm">
                 <div class="mb-4">
-                    <label for="clientName" class="block text-gray-700 font-semibold mb-2">O seu Nome:</label>
-                    <input type="text" id="clientName" name="clientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="clientName" class="block text-texto-secundario font-semibold mb-2">O seu Nome:</label>
+                    <input type="text" id="clientName" name="clientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="mb-4">
-                    <label for="clientPhone" class="block text-gray-700 font-semibold mb-2">O seu Telefone (WhatsApp):</label>
-                    <input type="tel" id="clientPhone" name="clientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="clientPhone" class="block text-texto-secundario font-semibold mb-2">O seu Telefone (WhatsApp):</label>
+                    <input type="tel" id="clientPhone" name="clientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="mb-6">
-                    <label for="eventDate" class="block text-gray-700 font-semibold mb-2">Data do Evento:</label>
-                    <input type="date" id="eventDate" name="eventDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="eventDate" class="block text-texto-secundario font-semibold mb-2">Data do Evento:</label>
+                    <input type="date" id="eventDate" name="eventDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
                 </div>
                 <div class="flex flex-col-reverse sm:flex-row justify-end gap-4">
                     <button type="button" id="closeQuoteModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="whatsapp-btn flex items-center justify-center gap-2 bg-green-500 text-white font-bold px-6 py-2 rounded-lg hover:bg-green-600">
+                    <button type="submit" class="whatsapp-btn flex items-center justify-center gap-2 bg-secundaria text-texto-invertido font-bold px-6 py-2 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
                         Continuar
                     </button>
@@ -227,6 +241,14 @@
             <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
         </div>
     </div>
+    <!-- NOVO: Modal de Notificação (Alerta) -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-surface rounded-lg shadow-2xl p-6 w-full max-w-sm text-center">
+            <h3 id="alertTitle" class="text-xl font-bold mb-4 text-texto-principal">Aviso</h3>
+            <p id="alertMessage" class="text-texto-secundario mb-6"></p>
+            <button id="closeAlertBtn" class="bg-primaria text-texto-invertido px-8 py-2 rounded-lg hover:bg-blue-700">OK</button>
+        </div>
+    </div>
     
     <!-- SCRIPTS DO FIREBASE (Versão 8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -235,8 +257,8 @@
     
     <script src="script.js"></script>
 
-    <!-- NOVO: Rodapé -->
-    <footer class="bg-white text-gray-700 p-6 mt-12 border-t">
+    <!-- Rodapé -->
+    <footer class="bg-surface text-texto-secundario p-6 mt-12 border-t">
         <div class="container mx-auto text-center">
             <p>&copy; 2024 Nome da Sua Empresa. Todos os direitos reservados.</p>
             <p class="text-sm mt-2">Endereço da Loja | Telefone: (XX) XXXX-XXXX</p>

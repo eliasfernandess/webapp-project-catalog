@@ -2,6 +2,20 @@
 
 body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+}
+
+/* Garante que o layout principal ocupe o espaço restante */
+.flex-grow {
+    flex-grow: 1;
+}
+
+/* Estilo para o filtro de kit ativo */
+.active-filter {
+    background-color: var(--cor-primaria) !important;
+    color: var(--cor-texto-invertido) !important;
+    box-shadow: 0 0 0 2px var(--cor-primaria);
 }
 
 /* Efeito de hover e transição para os cartões */
@@ -14,17 +28,12 @@ body {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo para o filtro ativo */
-.active-filter {
-    box-shadow: 0 0 0 2px theme('colors.blue.500');
-}
-
 /* Animações de entrada e saída para os modais */
 .modal-content {
     transition: transform 0.3s ease;
 }
 
-#themeModal, #imageModal {
+#themeModal, #imageModal, #alertModal, #rentalModal, #quoteModal {
     transition: opacity 0.3s ease;
 }
 
@@ -39,10 +48,5 @@ body {
 }
 .whatsapp-btn:hover {
     background-color: #128C7E; /* Cor mais escura do WhatsApp no hover */
-}
-
-/* Garante que o conteúdo principal ocupe o espaço disponível, empurrando o rodapé para baixo */
-.flex-grow {
-    flex-grow: 1;
 }
 
