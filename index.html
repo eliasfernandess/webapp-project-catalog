@@ -4,103 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Pegue e Monte</title>
-    
-    <!-- Tailwind CSS (Framework de Estilo) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Link para o seu arquivo de estilo personalizado -->
+    <link rel="stylesheet" href="guia_de_estilo.css">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Configuração do Tailwind para usar as nossas cores personalizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primaria': 'var(--cor-primaria)',
+                        'secundaria': 'var(--cor-secundaria)',
+                        'destaque': 'var(--cor-destaque)',
+                        'fundo': 'var(--cor-fundo)',
+                        'surface': 'var(--cor-surface)',
+                        'texto-principal': 'var(--cor-texto-principal)',
+                        'texto-secundario': 'var(--cor-texto-secundario)',
+                        'texto-invertido': 'var(--cor-texto-invertido)',
+                        'sucesso': 'var(--cor-sucesso)',
+                        'erro': 'var(--cor-erro)',
+                        'aviso': 'var(--cor-aviso)',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
-    <div class="container mx-auto p-4 md:p-8">
-        
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">Nosso Catálogo de Temas</h1>
-            <p class="text-lg text-gray-600">Encontre o tema perfeito para sua festa!</p>
-        </header>
-
-        <div class="text-center mb-8">
-            <button id="addThemeBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition shadow-md text-lg">
-                + Adicionar Novo Tema
-            </button>
+    <!-- Header -->
+    <header class="bg-purple-600 text-white flex justify-between items-center px-4 py-3 sticky top-0 z-20 shadow-md">
+        <div class="text-xl font-bold">LOGO</div>
+        <button id="mobileMenuBtn" class="bg-yellow-400 text-purple-700 p-2 rounded-lg md:hidden">
+            ☰
+        </button>
+         <!-- Navegação para Desktop, mantendo a lógica de login do script original -->
+        <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4">
+                <a href="index.html" id="homeLink" class="text-white hover:bg-purple-700 px-3 py-2 rounded-md text-sm font-medium">Catálogo</a>
+                <a href="#" id="loginLink" class="bg-yellow-400 text-purple-700 hover:bg-yellow-500 px-4 py-2 rounded-md text-sm font-medium">Área Restrita</a>
+                <a href="#" id="adminPanelLink" class="hidden text-white hover:bg-purple-700 px-3 py-2 rounded-md text-sm font-medium">Painel Admin</a>
+                <a href="#" id="logoutBtn" class="hidden bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Sair</a>
+            </div>
         </div>
+    </header>
 
-        <!-- Formulário para Adicionar Novo Tema -->
-        <section id="addThemeFormContainer" class="hidden mb-8 p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold mb-4 text-center">Cadastrar Novo Tema</h2>
-            <form id="addThemeForm">
-                <div class="mb-4">
-                    <label for="themeName" class="block text-gray-700 font-semibold mb-2">Nome do Tema</label>
-                    <input type="text" id="themeName" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                </div>
-                <div class="mb-4">
-                    <label for="themeCoverImage" class="block text-gray-700 font-semibold mb-2">URL da Imagem de Capa</label>
-                    <input type="url" id="themeCoverImage" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Imagem principal que aparece no catálogo" required>
-                </div>
-                <div class="mb-6 p-4 border border-gray-200 rounded-lg">
-                    <label class="block text-gray-700 font-semibold mb-2">Kits e Imagens Específicas</label>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" value="bronze" class="h-4 w-4 mr-2 kit-checkbox"> Bronze</label>
-                            <input type="url" id="themeImageBronze" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Bronze">
-                        </div>
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" value="prata" class="h-4 w-4 mr-2 kit-checkbox"> Prata</label>
-                            <input type="url" id="themeImagePrata" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Prata">
-                        </div>
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" value="ouro" class="h-4 w-4 mr-2 kit-checkbox"> Ouro</label>
-                            <input type="url" id="themeImageOuro" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Ouro">
-                        </div>
-                    </div>
-                </div>
-                <div id="formMessage" class="text-red-600 text-center mb-4 font-semibold"></div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">Salvar Tema</button>
-            </form>
+     <!-- Menu Mobile -->
+    <div class="hidden md:hidden bg-purple-500 text-white" id="mobileMenu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+             <a href="index.html" id="mobileHomeLink" class="hover:bg-purple-700 block px-3 py-2 rounded-md text-base font-medium">Catálogo</a>
+             <a href="#" id="mobileLoginLink" class="hover:bg-purple-700 block px-3 py-2 rounded-md text-base font-medium">Área Restrita</a>
+             <a href="#" id="mobileAdminPanelLink" class="hidden hover:bg-purple-700 block px-3 py-2 rounded-md text-base font-medium">Painel Admin</a>
+             <a href="#" id="mobileLogoutBtn" class="hidden bg-red-500 hover:bg-red-600 block px-3 py-2 rounded-md text-base font-medium">Sair</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto flex-grow">
+        <!-- Intro -->
+        <section class="text-center my-6 px-4">
+            <h1 class="text-purple-700 text-2xl font-semibold">Conheça nosso Hiper catálogo</h1>
+            <p class="text-gray-500 text-sm mt-1">
+            Encontre o tema perfeito para sua festa. Navegue por nossas opções e solicite um orçamento facilmente.
+            </p>
         </section>
 
-        <!-- Filtros e Pesquisa -->
-        <div class="flex flex-col md:flex-row gap-4 mb-8 p-4 bg-white rounded-lg shadow-sm">
-            <div class="flex-grow">
-                <input type="text" id="searchInput" placeholder="Digite o nome do tema..." class="w-full p-3 border border-gray-300 rounded-lg">
+        <!-- Filtros -->
+        <section class="px-4 space-y-3">
+            <input type="text" id="searchInput" placeholder="Pesquisar por nome ou categoria..." 
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+
+            <div class="flex gap-3">
+                <select id="categoryFilter" class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm">
+                    <option value="todas">Todas as categorias</option>
+                </select>
             </div>
-            <div class="flex items-center justify-center gap-2 flex-wrap" id="filterButtons">
-                <button data-kit="todos" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">Todos</button>
-                <button data-kit="bronze" class="px-4 py-2 bg-orange-300 text-orange-900 rounded-lg font-semibold">Bronze</button>
-                <button data-kit="prata" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-semibold">Prata</button>
-                <button data-kit="ouro" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg font-semibold">Ouro</button>
+             <!-- Filtros de Kit com a lógica de botões do script original -->
+            <div id="filterButtons" class="flex flex-wrap gap-2 justify-center">
+                <button data-kit="todos" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-purple-700 font-semibold py-2 rounded-lg active-filter">Ver todos</button>
+                <button data-kit="bronze" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg">Bronze</button>
+                <button data-kit="prata" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg">Prata</button>
+                <button data-kit="ouro" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg">Ouro</button>
             </div>
+             <!-- Controles de Admin (inicialmente ocultos) -->
+            <div id="adminControls" class="hidden text-center pt-4">
+                 <button id="addThemeBtn" class="bg-secundaria hover:bg-green-600 text-texto-invertido font-bold py-3 px-6 rounded-lg transition shadow-md">
+                    + Adicionar Novo Tema
+                </button>
+            </div>
+        </section>
+
+         <!-- Formulário de Adicionar Tema (inicialmente oculto) -->
+        <section id="addThemeFormContainer" class="hidden my-6 px-4">
+             <!-- O conteúdo do formulário de admin do index.html original pode ser inserido aqui se necessário -->
+        </section>
+
+        <div id="loadingIndicator" class="text-center py-10">
+            <p class="text-lg text-texto-secundario">A carregar temas...</p>
         </div>
 
-        <!-- Container do Catálogo -->
-        <main id="theme-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></main>
+        <!-- Lista de produtos -->
+        <main id="theme-catalog" class="grid grid-cols-2 gap-4 mt-6 px-4 pb-8"></main>
     </div>
 
-    <!-- Modal para Detalhes do Tema -->
-    <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95">
-            <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl z-10">&times;</button>
-            <h2 id="modalThemeName" class="text-3xl font-bold text-center mb-6">Nome do Tema</h2>
-            <div id="modalKitsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    <!-- Modal de Alerta (reutilizado do projeto original) -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-surface rounded-lg shadow-2xl p-6 w-full max-w-sm text-center">
+            <h3 id="alertTitle" class="text-xl font-bold mb-4 text-texto-principal">Aviso</h3>
+            <p id="alertMessage" class="text-texto-secundario mb-6"></p>
+            <button id="closeAlertBtn" class="bg-primaria text-texto-invertido px-8 py-2 rounded-lg hover:bg-blue-700">OK</button>
         </div>
     </div>
-
-    <!-- Modal para Visualização de Imagem (Lightbox) -->
-    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0">
-        <button id="closeImageModalBtn" class="absolute top-4 right-4 text-white text-5xl font-light z-10">&times;</button>
-        <div class="relative">
-            <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
-        </div>
-    </div>
-
-    <!-- Link para o seu arquivo de script -->
+    
+    <!-- SCRIPTS DO FIREBASE (Versão 8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
     <script src="script.js"></script>
+
+    <!-- Rodapé -->
+    <footer class="bg-surface text-texto-secundario p-6 mt-auto border-t">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Hiper Festa. Todos os direitos reservados.</p>
+            <p class="text-sm mt-2">Av. Cel. Teodolino Pereira Araújo, 2225 - Centro, Araguari - MG | Telefone: (34) 3512-9843</p>
+        </div>
+    </footer>
 </body>
 </html>
-

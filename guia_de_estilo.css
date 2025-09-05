@@ -1,0 +1,21 @@
+:root {
+  /* Paleta Principal - Estilo Roxo Vibrante */
+  --cor-primaria: #A855F7;      /* Roxo principal para cabeçalho e botões (Purple-500) */
+  --cor-secundaria: #FBBF24;   /* Amarelo para botões de filtro (Amber-400) */
+  --cor-destaque: #EC4899;     /* Rosa para atenção ou destaques (Pink-500) */
+  
+  /* Cores Neutras */
+  --cor-fundo: #F3F4F6;      /* Fundo principal cinza muito claro (Gray-100) */
+  --cor-surface: #FFFFFF;    /* Cor de superfícies como cartões e modais */
+  
+  /* Cores de Texto */
+  --cor-texto-principal: #111827; /* Texto escuro principal (Gray-900) */
+  --cor-texto-secundario: #6B7280;/* Texto mais claro para descrições (Gray-500) */
+  --cor-texto-invertido: #FFFFFF; /* Texto para usar em fundos coloridos */
+  
+  /* Cores de Feedback */
+  --cor-sucesso: #10B981;    /* Verde para sucesso (Emerald-500) */
+  --cor-erro: #EF4444;       /* Vermelho para erros (Red-500) */
+  --cor-aviso: #FBBF24;      /* Amarelo para avisos (Amber-400) */
+}
+
