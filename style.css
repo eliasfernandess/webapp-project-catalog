@@ -1,52 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--cor-fundo);
     color: var(--cor-texto-principal);
 }
 
-/* Garante que o layout principal ocupe o espaço restante */
+h1, h2, h3 {
+     font-family: 'Poppins', sans-serif;
+}
+
 .flex-grow {
     flex-grow: 1;
 }
 
-/* Estilo para o filtro de kit ativo */
-.active-filter {
-    background-color: var(--cor-primaria) !important;
-    color: var(--cor-texto-invertido) !important;
-    box-shadow: 0 0 0 2px var(--cor-primaria);
-}
-
-/* Efeito de hover e transição para os cartões */
 .theme-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .theme-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
 }
+
+.kit-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+}
+
+.kit-badge-b { background-color: #F97316; } /* Laranja */
+.kit-badge-p { background-color: #A8A29E; } /* Cinza */
+.kit-badge-o { background-color: #FACC15; } /* Amarelo */
 
 /* Animações de entrada e saída para os modais */
-.modal-content {
-    transition: transform 0.3s ease;
-}
-
 #themeModal, #imageModal, #alertModal, #rentalModal, #quoteModal {
     transition: opacity 0.3s ease;
 }
-
-/* Deixa o cursor do rato como um ponteiro para imagens clicáveis */
-.kit-image {
-    cursor: pointer;
-}
-
-/* Estilo para o botão do WhatsApp */
-.whatsapp-btn {
-    transition: background-color 0.3s;
-}
-.whatsapp-btn:hover {
-    background-color: #128C7E; /* Cor mais escura do WhatsApp no hover */
-}
-
