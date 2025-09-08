@@ -107,11 +107,11 @@ body {
 
 /* Estilos para o novo Modal de Detalhes */
 .modal-content {
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-#themeModal {
-    transition: opacity 0.3s ease;
+#themeModal.opacity-0 .modal-content {
+    transform: scale(0.95);
 }
 
 .modal-kit-card {
@@ -191,17 +191,18 @@ body {
     gap: 0.5rem;
 }
 
-/* Correção para o nome do tema não cortar os emblemas no celular */
-.theme-card h3 {
-    min-width: 0;
-}
+/* Esconde/Mostra layout de acordo com o tamanho do ecrã */
+.mobile-card-header { display: none; }
+.desktop-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.desktop-card-category { display: block; }
+
 
 /* Estilos do Carrossel de Destaques */
 .carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
     border: none;
     border-radius: 9999px;
     width: 40px;
@@ -214,10 +215,26 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
 }
 
 .carousel-btn:hover {
     background-color: white;
+}
+
+/* Ajuste para botões do carrossel no telemóvel */
+@media (max-width: 768px) {
+    .carousel-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+    .carousel-btn.left-0 {
+        left: 4px;
+    }
+    .carousel-btn.right-0 {
+        right: 4px;
+    }
 }
 
 
@@ -226,5 +243,24 @@ body {
     0% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
     50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(250, 204, 21, 0.8); }
     100% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
+}
+
+/* Ajustes finos de layout para telemóveis */
+@media (max-width: 640px) {
+    .desktop-card-header, .desktop-card-category {
+        display: none;
+    }
+    .mobile-card-header {
+        display: block;
+        margin-bottom: 0.5rem; /* Adiciona espaço antes dos emblemas */
+    }
+    .kit-badge {
+        width: auto;   
+        height: 22px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        border-radius: 0.25rem; 
+        font-size: 0.8rem;
+    }
 }
 

@@ -275,19 +275,27 @@ document.addEventListener('DOMContentLoaded', () => {
             `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`
         ).join(' ');
 
+        // A ESTRUTURA HTML (desktop vs mobile) é controlada via CSS, mas a estrutura base é esta:
         cardContent.innerHTML = `
             <div class="relative">
                 <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
                 ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
             </div>
             <div class="p-4 flex flex-col flex-grow">
-                <div class="flex justify-between items-start">
+                <div class="desktop-card-header">
                      <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2 min-w-0">${theme.name}</h3>
                      <div class="flex flex-shrink-0 gap-1">
                         ${availableKitsHtml}
                     </div>
                 </div>
-                <p class="text-sm text-texto-secundario mb-4">${theme.category || 'Sem Categoria'}</p>
+                <div class="mobile-card-header">
+                    <h3 class="text-lg font-bold text-texto-principal min-w-0">${theme.name}</h3>
+                    <p class="text-sm text-texto-secundario">${theme.category || 'Sem Categoria'}</p>
+                    <div class="flex gap-2 mt-2">
+                        ${availableKitsHtml}
+                    </div>
+                </div>
+                <p class="desktop-card-category text-sm text-texto-secundario mb-4">${theme.category || 'Sem Categoria'}</p>
                 <div class="mt-auto">
                     <button class="details-btn w-full btn-gradient btn-primaria text-texto-invertido font-bold py-2 px-4 rounded-lg" data-id="${theme.id}">
                         Ver detalhes
@@ -399,11 +407,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getItemsPerPage() {
+        if (window.innerWidth < 640) return 2;
+        if (window.innerWidth < 1024) return 3;
+        return 4;
+    }
+
     function moveCarousel(direction) {
         const carouselItems = featuredContainer.children.length;
         if (carouselItems === 0) return;
 
-        const itemsPerPage = window.innerWidth < 640 ? 2 : (window.innerWidth < 1024 ? 3 : 4);
+        const itemsPerPage = getItemsPerPage();
         const maxIndex = Math.ceil(carouselItems / itemsPerPage) - 1;
 
         carouselIndex = Math.max(0, Math.min(carouselIndex + direction, maxIndex));
@@ -411,7 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateCarousel() {
-        const percentageOffset = carouselIndex * 100;
+        const itemsPerPage = getItemsPerPage();
+        const percentageOffset = carouselIndex * (100 / itemsPerPage);
         featuredContainer.style.transform = `translateX(-${percentageOffset}%)`;
     }
 
