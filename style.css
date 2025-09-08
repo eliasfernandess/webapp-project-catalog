@@ -127,3 +127,60 @@ body {
     min-width: 0; /* Permite que o elemento flexível encolha abaixo do tamanho do seu conteúdo */
 }
 
+/* Estilo para o botão de detalhes nos Destaques */
+.featured-card .details-btn {
+    background-color: var(--cor-destaque);
+    color: var(--cor-texto-principal);
+}
+
+.featured-card .details-btn:hover {
+    background-color: #eab308; /* Amarelo um pouco mais escuro para o hover */
+}
+
+
+/* Estilos do Carrossel de Destaques */
+#featured-container .theme-card {
+    flex: 0 0 50%; /* No celular, cada card ocupa metade do container */
+    max-width: 50%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+@media (min-width: 640px) { /* sm */
+    #featured-container .theme-card {
+        flex: 0 0 33.3333%;
+        max-width: 33.3333%;
+    }
+}
+
+@media (min-width: 1024px) { /* lg */
+    #featured-container .theme-card {
+        flex: 0 0 25%;
+        max-width: 25%;
+        padding: 0.75rem;
+    }
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 9999px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    color: var(--cor-primaria);
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.carousel-btn:hover {
+    background-color: white;
+}
+

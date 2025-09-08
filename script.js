@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
 
     const kitDetails = {
-        bronze: { price: 'R$ 150,00', class: 'bg-orange-300 text-orange-900' },
-        prata: { price: 'R$ 250,00', class: 'bg-gray-300 text-gray-800' },
-        ouro: { price: 'R$ 300,00', class: 'bg-yellow-400 text-yellow-900' }
+        bronze: { price: 'R$ 150,00' },
+        prata: { price: 'R$ 250,00' },
+        ouro: { price: 'R$ 300,00' }
     };
 
     // --- ELEMENTOS DA PÁGINA ---
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryFilter = document.getElementById('categoryFilter');
     const kitFilter = document.getElementById('kitFilter');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    const resetKitsBtn = document.getElementById('resetKitsBtn');
+    const viewAllKitsBtn = document.getElementById('viewAllKitsBtn');
     const addThemeFormContainer = document.getElementById('addThemeFormContainer');
     const addThemeForm = document.getElementById('addThemeForm');
     const formTitle = document.getElementById('formTitle');
@@ -79,9 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const alertMessage = document.getElementById('alertMessage');
     const closeAlertBtn = document.getElementById('closeAlertBtn');
 
+    // Elementos do Carrossel
+    const featuredSection = document.getElementById('featured-section');
+    const featuredContainer = document.getElementById('featured-container');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
     let editingThemeId = null;
     let currentRentalData = {};
     let currentQuoteData = {};
+    let carouselIndex = 0;
 
     // --- SETUP INICIAL ---
     function initialize() {
@@ -101,21 +108,33 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenu.classList.toggle('hidden');
             mobileMenuBtn.querySelectorAll('svg').forEach(icon => icon.classList.toggle('hidden'));
         });
-        searchInput.addEventListener('input', filterAndSearch);
-        categoryFilter.addEventListener('change', filterAndSearch);
-        kitFilter.addEventListener('change', filterAndSearch);
+
+        // Listeners dos Filtros
+        searchInput.addEventListener('input', () => updateView({ scrollToKits: true }));
+        categoryFilter.addEventListener('change', () => updateView({ scrollToKits: true }));
+        kitFilter.addEventListener('change', () => updateView({ scrollToKits: true }));
+
         clearFiltersBtn.addEventListener('click', () => {
             searchInput.value = '';
             categoryFilter.value = 'todas';
             kitFilter.value = 'todos';
-            filterAndSearch();
+            updateView();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-        resetKitsBtn.addEventListener('click', () => {
+
+        viewAllKitsBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            categoryFilter.value = 'todas';
             kitFilter.value = 'todos';
-            filterAndSearch();
+            updateView({ scrollToKits: true, forceHideFeatured: true });
         });
+
         downloadReportBtn.addEventListener('click', downloadReport);
         closeAlertBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
+
+        // Listeners do Carrossel
+        prevBtn.addEventListener('click', () => moveCarousel(-1));
+        nextBtn.addEventListener('click', () => moveCarousel(1));
     }
 
     function populateDateSelectors() {
@@ -183,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
         themesCollection.orderBy('name').onSnapshot(snapshot => {
             themes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             populateCategoryFilter();
-            filterAndSearch();
+            setupFeaturedCarousel();
+            updateView();
             loadingIndicator.classList.add('hidden');
         }, error => {
             console.error("Erro ao buscar temas: ", error);
@@ -206,51 +226,46 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryFilter.value = currentCategory;
     }
 
-    function displayThemes(themesToDisplay) {
-        catalogContainer.innerHTML = '';
-        if (themesToDisplay.length === 0 && !loadingIndicator.classList.contains('hidden')) {
-            catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
-            return;
-        }
-        themesToDisplay.forEach(theme => {
-            const isRentedToday = isThemeRentedOnDate(theme, new Date().toISOString().split('T')[0]);
-            const card = document.createElement('div');
-            card.className = `theme-card bg-surface rounded-xl shadow-md overflow-hidden flex flex-col`;
+    function createThemeCard(theme, isFeatured = false) {
+        const isRentedToday = isThemeRentedOnDate(theme, new Date().toISOString().split('T')[0]);
+        const card = document.createElement('div');
+        card.className = `theme-card bg-surface rounded-xl shadow-md overflow-hidden flex flex-col ${isFeatured ? 'featured-card' : ''}`;
 
-            let availableKitsHtml = (theme.kits || []).map(kit =>
-                `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`
-            ).join(' ');
+        let availableKitsHtml = (theme.kits || []).map(kit =>
+            `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`
+        ).join(' ');
 
-            card.innerHTML = `
-                <div class="relative">
-                    <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
-                    ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
-                </div>
-                <div class="p-4 flex flex-col flex-grow">
-                    <div class="flex justify-between items-start">
-                         <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2">${theme.name}</h3>
-                         <div class="flex flex-shrink-0 gap-2">
-                            ${availableKitsHtml}
-                        </div>
-                    </div>
-                    <p class="text-sm text-texto-secundario mb-4">${theme.category || 'Sem Categoria'}</p>
-                    <div class="mt-auto">
-                        <button class="details-btn w-full bg-primaria text-texto-invertido font-bold py-2 px-4 rounded-lg hover:bg-primaria-escura transition" data-id="${theme.id}">
-                            Ver detalhes
-                        </button>
+        card.innerHTML = `
+            <div class="relative">
+                <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
+                ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
+            </div>
+            <div class="p-4 flex flex-col flex-grow">
+                <div class="flex justify-between items-start">
+                     <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2">${theme.name}</h3>
+                     <div class="flex flex-shrink-0 gap-2">
+                        ${availableKitsHtml}
                     </div>
                 </div>
-            `;
-            card.querySelector('.details-btn').addEventListener('click', () => openThemeModal(theme.id));
-            catalogContainer.appendChild(card);
-        });
+                <p class="text-sm text-texto-secundario mb-4">${theme.category || 'Sem Categoria'}</p>
+                <div class="mt-auto">
+                    <button class="details-btn w-full bg-primaria text-texto-invertido font-bold py-2 px-4 rounded-lg hover:bg-primaria-escura transition" data-id="${theme.id}">
+                        Ver detalhes
+                    </button>
+                </div>
+            </div>
+        `;
+        card.querySelector('.details-btn').addEventListener('click', () => openThemeModal(theme.id));
+        return card;
     }
 
-    function filterAndSearch() {
+    function displayFilteredThemes() {
         const searchTerm = searchInput.value.toLowerCase();
         const activeCategory = categoryFilter.value;
         const activeKit = kitFilter.value;
+
         let filteredThemes = themes;
+
         if (activeCategory !== 'todas') {
             filteredThemes = filteredThemes.filter(theme => theme.category === activeCategory);
         }
@@ -263,8 +278,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 (theme.category && theme.category.toLowerCase().includes(searchTerm))
             );
         }
-        displayThemes(filteredThemes);
+
+        catalogContainer.innerHTML = '';
+        if (filteredThemes.length === 0) {
+            catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
+            return;
+        }
+        filteredThemes.forEach(theme => {
+            catalogContainer.appendChild(createThemeCard(theme));
+        });
     }
+
+    function updateView(options = {}) {
+        const { scrollToKits = false, forceHideFeatured = false } = options;
+        const searchTerm = searchInput.value.toLowerCase();
+        const activeCategory = categoryFilter.value;
+        const activeKit = kitFilter.value;
+        const isAnyFilterActive = searchTerm || activeCategory !== 'todas' || activeKit !== 'todos';
+
+        const featuredThemes = themes.filter(theme => theme.featured);
+        if (isAnyFilterActive || forceHideFeatured) {
+            featuredSection.classList.add('hidden');
+        } else {
+            if (featuredThemes.length > 0) {
+                featuredSection.classList.remove('hidden');
+            }
+        }
+
+        displayFilteredThemes();
+
+        if (scrollToKits) {
+            document.getElementById('all-kits-title').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // --- LÓGICA DO CARROSSEL ---
+    function setupFeaturedCarousel() {
+        const featuredThemes = themes.filter(theme => theme.featured);
+        featuredContainer.innerHTML = '';
+        if (featuredThemes.length > 0) {
+            featuredThemes.forEach(theme => {
+                featuredContainer.appendChild(createThemeCard(theme, true));
+            });
+            featuredSection.classList.remove('hidden');
+            updateCarousel();
+        } else {
+            featuredSection.classList.add('hidden');
+        }
+    }
+
+    function moveCarousel(direction) {
+        const featuredThemes = themes.filter(theme => theme.featured);
+        const itemsPerPage = window.innerWidth < 640 ? 2 : (window.innerWidth < 1024 ? 3 : 4);
+        const maxIndex = Math.ceil(featuredThemes.length / itemsPerPage) - 1;
+
+        carouselIndex += direction;
+
+        if (carouselIndex < 0) {
+            carouselIndex = 0;
+        }
+        if (carouselIndex > maxIndex) {
+            carouselIndex = maxIndex;
+        }
+        updateCarousel();
+    }
+
+    function updateCarousel() {
+        const offset = -carouselIndex * 100;
+        featuredContainer.style.transform = `translateX(${offset}%)`;
+    }
+
+    window.addEventListener('resize', () => {
+        carouselIndex = 0;
+        setupFeaturedCarousel();
+    });
 
     addThemeBtn.addEventListener('click', () => {
         editingThemeId = null;
@@ -278,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formMessage.textContent = "";
         const name = document.getElementById('themeName').value;
         const category = document.getElementById('themeCategory').value;
+        const featured = document.getElementById('themeFeatured').checked;
         const coverImage = document.getElementById('themeCoverImage').value;
         const kits = Array.from(addThemeForm.querySelectorAll('input[name="kits"]:checked')).map(cb => cb.value);
         const images = {
@@ -289,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formMessage.textContent = "Selecione pelo menos um kit.";
             return;
         }
-        const themeData = { name, category, coverImage, kits, images };
+        const themeData = { name, category, coverImage, kits, images, featured };
         try {
             if (editingThemeId) {
                 const themeRef = themesCollection.doc(editingThemeId);
@@ -366,7 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
             modalKitsContainer.appendChild(kitDiv);
         });
 
-        // Manter botões de admin e lista de agendamentos
         if (currentUser) {
             const adminSection = document.createElement('div');
             adminSection.className = 'mt-6 pt-4 border-t';
@@ -435,6 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formTitle.textContent = "Editar Tema";
             addThemeForm.themeName.value = theme.name;
             addThemeForm.themeCategory.value = theme.category || '';
+            addThemeForm.themeFeatured.checked = theme.featured || false;
             addThemeForm.themeCoverImage.value = theme.coverImage;
             addThemeForm.querySelectorAll('input[name="kits"]').forEach(cb => {
                 cb.checked = (theme.kits || []).includes(cb.value);
