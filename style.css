@@ -10,7 +10,64 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-/* Estilos para os Kit Badges nos Cards */
+/* Estilo para links ativos no menu */
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+}
+
+/* --- ESTILOS DE BOTÕES COM GRADIENTE --- */
+.btn-gradient {
+    transition: all 0.3s ease;
+    border: none;
+    color: var(--cor-texto-invertido);
+    background-size: 200% auto;
+    position: relative; 
+    overflow: hidden;   
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-gradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.8s ease;
+}
+
+.btn-gradient:hover::after {
+    left: 100%;
+}
+
+.btn-gradient:hover {
+    background-position: right center; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Gradientes específicos */
+.btn-primaria {
+    background-image: linear-gradient(45deg, var(--cor-primaria) 0%, var(--cor-primaria-escura) 51%, var(--cor-primaria) 100%);
+}
+.btn-destaque {
+    background-image: linear-gradient(45deg, var(--cor-destaque) 0%, var(--cor-secundaria) 51%, var(--cor-destaque) 100%);
+    color: var(--cor-texto-principal);
+}
+.btn-sucesso {
+     background-image: linear-gradient(45deg, var(--cor-sucesso) 0%, var(--cor-sucesso-escuro) 51%, var(--cor-sucesso) 100%);
+}
+.btn-erro {
+    background-image: linear-gradient(45deg, var(--cor-erro) 0%, var(--cor-erro-escuro) 51%, var(--cor-erro) 100%);
+}
+.btn-secundaria {
+     background-image: linear-gradient(45deg, var(--cor-secundaria) 0%, var(--cor-kit-ouro-escuro) 51%, var(--cor-secundaria) 100%);
+     color: var(--cor-texto-principal);
+}
+
+/* --- ESTILOS DOS EMBLEMAS DOS KITS COM EFEITO DE BRILHO --- */
 .kit-badge {
     width: 28px;
     height: 28px;
@@ -19,13 +76,20 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: var(--cor-texto-principal);
-    border: 2px solid var(--cor-texto-principal);
+    color: var(--cor-texto-invertido);
+    border: 1px solid rgba(0,0,0,0.1);
 }
 
-.kit-badge-b { background-color: #f97316; /* orange-500 */ color: white; border-color: #f97316; }
-.kit-badge-p { background-color: #a8a29e; /* stone-400 */ color: white; border-color: #a8a29e; }
-.kit-badge-o { background-color: #facc15; /* yellow-400 */ color: var(--cor-texto-principal); border-color: #facc15; }
+.kit-badge-b { 
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-bronze), var(--cor-kit-bronze-escuro));
+}
+.kit-badge-p { 
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-prata), var(--cor-kit-prata-escuro));
+}
+.kit-badge-o { 
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-ouro), var(--cor-kit-ouro-escuro));
+    color: var(--cor-texto-principal); 
+}
 
 /* Efeito de hover e transição para os cartões */
 .theme-card {
@@ -37,11 +101,9 @@ body {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Deixa o cursor do rato como um ponteiro para imagens clicáveis */
 .kit-image {
     cursor: pointer;
 }
-
 
 /* Estilos para o novo Modal de Detalhes */
 .modal-content {
@@ -56,7 +118,6 @@ body {
     border: 2px solid var(--cor-primaria);
     border-radius: 0.75rem;
     padding: 1rem;
-    margin-bottom: 1.5rem;
     text-align: center;
     background-color: var(--cor-surface);
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -66,46 +127,55 @@ body {
     border-radius: 0.5rem;
     margin-bottom: 1rem;
     cursor: pointer;
-    border: 1px solid #e5e7eb; /* Borda cinza clara */
+    border: 1px solid #e5e7eb;
 }
 
 .modal-kit-title {
     font-weight: 600;
-    font-size: 1.125rem; /* text-lg */
+    font-size: 1.125rem;
     color: var(--cor-texto-principal);
 }
 
 .kit-tag {
     display: inline-block;
     padding: 0.25rem 0.75rem;
-    border-radius: 9999px; /* rounded-full */
+    border-radius: 9999px;
     font-weight: 600;
-    font-size: 0.875rem; /* text-sm */
+    font-size: 0.875rem;
     margin: 0.5rem 0;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.kit-tag:hover {
+    transform: scale(1.1);
 }
 
 .kit-tag-bronze {
-    background-color: #f97316; /* orange-500 */
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-bronze), var(--cor-kit-bronze-escuro));
     color: white;
+    box-shadow: 0 0 15px 2px rgba(239, 68, 68, 0.5);
 }
 .kit-tag-prata {
-    background-color: #a8a29e; /* stone-400 */
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-prata), var(--cor-kit-prata-escuro));
     color: white;
+    box-shadow: 0 0 15px 2px rgba(168, 162, 158, 0.5);
 }
 .kit-tag-ouro {
-    background-color: #facc15; /* yellow-400 */
+    background-image: linear-gradient(rgba(255,255,255,.3), rgba(255,255,255,0)), linear-gradient(to bottom, var(--cor-kit-ouro), var(--cor-kit-ouro-escuro));
     color: var(--cor-texto-principal);
+    animation: pulse-gold 2.5s infinite;
 }
 
 .kit-price {
-    font-size: 2.25rem; /* text-4xl */
+    font-size: 2.25rem;
     font-weight: 700;
     color: var(--cor-primaria);
     margin: 0.25rem 0;
 }
 
 .kit-obs {
-    font-size: 0.75rem; /* text-xs */
+    font-size: 0.75rem;
     color: var(--cor-texto-secundario);
     margin-bottom: 1rem;
 }
@@ -115,7 +185,6 @@ body {
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     font-weight: 700;
-    transition: background-color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -124,43 +193,10 @@ body {
 
 /* Correção para o nome do tema não cortar os emblemas no celular */
 .theme-card h3 {
-    min-width: 0; /* Permite que o elemento flexível encolha abaixo do tamanho do seu conteúdo */
+    min-width: 0;
 }
-
-/* Estilo para o botão de detalhes nos Destaques */
-.featured-card .details-btn {
-    background-color: var(--cor-destaque);
-    color: var(--cor-texto-principal);
-}
-
-.featured-card .details-btn:hover {
-    background-color: #eab308; /* Amarelo um pouco mais escuro para o hover */
-}
-
 
 /* Estilos do Carrossel de Destaques */
-#featured-container .theme-card {
-    flex: 0 0 50%; /* No celular, cada card ocupa metade do container */
-    max-width: 50%;
-    padding: 0.5rem;
-    box-sizing: border-box;
-}
-
-@media (min-width: 640px) { /* sm */
-    #featured-container .theme-card {
-        flex: 0 0 33.3333%;
-        max-width: 33.3333%;
-    }
-}
-
-@media (min-width: 1024px) { /* lg */
-    #featured-container .theme-card {
-        flex: 0 0 25%;
-        max-width: 25%;
-        padding: 0.75rem;
-    }
-}
-
 .carousel-btn {
     position: absolute;
     top: 50%;
@@ -182,5 +218,13 @@ body {
 
 .carousel-btn:hover {
     background-color: white;
+}
+
+
+/* Animação para o brilho do kit Ouro */
+@keyframes pulse-gold {
+    0% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
+    50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(250, 204, 21, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
 }
 

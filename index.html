@@ -22,284 +22,229 @@
                         'texto-secundario': 'var(--cor-texto-secundario)',
                         'texto-invertido': 'var(--cor-texto-invertido)',
                         'sucesso': 'var(--cor-sucesso)',
+                        'sucesso-escuro': 'var(--cor-sucesso-escuro)',
                         'erro': 'var(--cor-erro)',
-                        'aviso': 'var(--cor-aviso)',
+                        'erro-escuro': 'var(--cor-erro-escuro)',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-fundo">
+<body class="flex flex-col min-h-screen bg-fundo">
 
-    <!-- Cabeçalho Fixo e Responsivo -->
-    <header id="appHeader" class="bg-primaria shadow-md sticky top-0 z-20">
+    <!-- Cabeçalho Fixo -->
+    <header id="appHeader" class="bg-primaria shadow-md sticky top-0 z-20 text-texto-invertido">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0">
-                    <img src="imgs/logo_site.svg" alt="Logo do site" class="h-12" href="#">
+                     <img src="imgs/logo_site.svg" alt="Logo do site" class="h-12">
                 </div>
                 <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#" id="homeLink" class="text-white hover:bg-white/20 px-3 py-2 rounded-md text-sm font-medium">Catálogo</a>
-                        <a href="#" id="loginLink" class="bg-destaque hover:bg-yellow-400 text-texto-principal px-4 py-2 rounded-md text-sm font-medium">Área Restrita</a>
-                        <a href="#" id="adminPanelLink" class="hidden text-white hover:bg-white/20 px-3 py-2 rounded-md text-sm font-medium">Painel Admin</a>
+                    <div class="ml-10 flex items-baseline space-x-2">
+                        <a href="#" id="homeLink" class="nav-link active px-4 py-2 rounded-md text-sm font-medium hover:bg-white/20">Catálogo</a>
+                        <a href="#" id="rentalsLink" class="nav-link hidden px-4 py-2 rounded-md text-sm font-medium hover:bg-white/20">Alugados</a>
+                        <a href="#" id="reportsLink" class="nav-link hidden px-4 py-2 rounded-md text-sm font-medium hover:bg-white/20">Relatórios</a>
+                        <a href="#" id="loginLink" class="bg-destaque text-texto-principal hover:bg-yellow-400 px-4 py-2 rounded-md text-sm font-medium">Área Restrita</a>
                         <a href="#" id="logoutBtn" class="hidden bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-md text-sm font-medium">Sair</a>
                     </div>
                 </div>
-                <div class="-mr-2 flex md:hidden">
-                    <button id="mobileMenuBtn" type="button" class="bg-white/20 inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/30 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Abrir menu principal</span>
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                <div class="flex md:hidden">
+                    <button id="mobileMenuBtn" type="button" class="bg-white/20 inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/30 focus:outline-none">
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
         </nav>
         <div class="hidden md:hidden" id="mobileMenu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-primaria">
-                 <a href="#" id="mobileHomeLink" class="text-white hover:bg-white/20 block px-3 py-2 rounded-md text-base font-medium">Catálogo</a>
+                 <a href="#" id="mobileHomeLink" class="nav-link active block px-3 py-2 rounded-md text-base font-medium hover:bg-white/20">Catálogo</a>
+                 <a href="#" id="mobileRentalsLink" class="nav-link hidden block px-3 py-2 rounded-md text-base font-medium hover:bg-white/20">Alugados</a>
+                 <a href="#" id="mobileReportsLink" class="nav-link hidden block px-3 py-2 rounded-md text-base font-medium hover:bg-white/20">Relatórios</a>
                  <a href="#" id="mobileLoginLink" class="bg-destaque text-texto-principal block px-3 py-2 rounded-md text-base font-medium">Área Restrita</a>
-                 <a href="#" id="mobileAdminPanelLink" class="hidden text-white hover:bg-white/20 block px-3 py-2 rounded-md text-base font-medium">Painel Admin</a>
-                 <a href="#" id="mobileLogoutBtn" class="hidden bg-erro text-texto-invertido block px-3 py-2 rounded-md text-base font-medium">Sair</a>
+                 <a href="#" id="mobileLogoutBtn" class="hidden bg-erro block px-3 py-2 rounded-md text-base font-medium">Sair</a>
             </div>
         </div>
     </header>
 
     <!-- Ecrã de Login -->
-    <div id="loginScreen" class="hidden flex-grow flex-col items-center justify-center p-4">
-        <div class="w-full max-w-md bg-surface p-6 sm:p-8 rounded-lg shadow-xl">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center text-texto-principal mb-6">Acesso Restrito</h2>
+    <div id="loginScreen" class="hidden flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-surface p-8 rounded-lg shadow-xl">
+            <h2 class="text-3xl font-bold text-center text-texto-principal mb-6 font-display">Acesso Restrito</h2>
             <form id="loginForm">
-                 <div class="mb-4">
-                    <label for="email" class="block text-texto-secundario font-semibold mb-2">Email</label>
-                    <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                </div>
-                <div class="mb-6">
-                    <label for="password" class="block text-texto-secundario font-semibold mb-2">Senha</label>
-                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                </div>
+                <div class="mb-4"><input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Email" required></div>
+                <div class="mb-6"><input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Senha" required></div>
                 <div id="loginMessage" class="text-erro text-center mb-4 font-semibold"></div>
-                <button type="submit" class="w-full bg-primaria hover:bg-primaria-escura text-texto-invertido font-bold py-3 px-4 rounded-lg transition">Entrar</button>
+                <button type="submit" class="w-full btn-gradient btn-primaria font-bold py-3 px-4 rounded-lg">Entrar</button>
             </form>
         </div>
     </div>
 
-    <!-- Conteúdo Principal do Catálogo -->
-    <main id="mainContent" class="container mx-auto p-4 md:p-8 flex-grow">
-        <div id="adminControls" class="hidden mb-8 space-y-8">
-            <div class="text-center">
-                <button id="addThemeBtn" class="bg-sucesso hover:bg-green-600 text-texto-invertido font-bold py-3 px-6 rounded-lg transition shadow-md text-base sm:text-lg">
-                    + Adicionar Novo Tema
-                </button>
+    <!-- Ecrã de Relatórios -->
+    <div id="reportsScreen" class="hidden flex-grow flex items-center justify-center p-4">
+        <section id="reportSection" class="w-full max-w-md bg-surface p-8 rounded-lg shadow-xl text-center">
+            <h3 class="text-3xl font-bold mb-4 text-texto-principal font-display">Relatório de Agendamentos</h3>
+            <p class="text-texto-secundario mb-6">Selecione o mês e o ano para descarregar.</p>
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                <select id="reportMonth" class="w-full sm:w-auto p-3 border border-gray-300 rounded-lg"></select>
+                <select id="reportYear" class="w-full sm:w-auto p-3 border border-gray-300 rounded-lg"></select>
+                <button id="downloadReportBtn" class="w-full sm:w-auto btn-gradient btn-sucesso font-bold py-3 px-6 rounded-lg">Descarregar</button>
             </div>
-            <section id="reportSection" class="p-4 sm:p-6 bg-surface rounded-lg shadow-md max-w-2xl mx-auto border">
-                <h3 class="text-xl sm:text-2xl font-bold mb-4 text-center">Relatório de Agendamentos</h3>
-                <p class="text-center text-texto-secundario mb-4">Selecione o mês e o ano para descarregar o relatório.</p>
-                <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                    <select id="reportMonth" class="p-3 border border-gray-300 rounded-lg"></select>
-                    <select id="reportYear" class="p-3 border border-gray-300 rounded-lg"></select>
-                    <button id="downloadReportBtn" class="bg-sky-500 hover:bg-sky-600 text-texto-invertido font-bold py-3 px-6 rounded-lg transition shadow-md">Descarregar</button>
+        </section>
+    </div>
+
+    <!-- Ecrã de Alugados -->
+     <div id="rentalsScreen" class="hidden flex-grow container mx-auto p-4 md:p-8">
+        <h2 class="text-3xl font-bold text-center text-texto-principal mb-8 font-display">Alugados do Mês</h2>
+        <div id="monthlyRentalsContainer" class="space-y-4 max-w-3xl mx-auto"></div>
+    </div>
+
+    <!-- Conteúdo Principal do Catálogo -->
+    <main id="mainContent" class="flex-grow">
+        <div class="container mx-auto p-4 md:p-8">
+             <div id="adminControls" class="hidden text-center mb-8">
+                <button id="addThemeBtn" class="btn-gradient btn-sucesso font-bold py-3 px-6 rounded-lg shadow-md text-lg">+ Adicionar Novo Tema</button>
+            </div>
+            <!-- Filtros -->
+            <section class="bg-surface p-6 rounded-xl shadow-lg mb-8">
+                <div class="text-center mb-4">
+                    <h2 class="text-3xl font-bold text-primaria font-display">Conheça nosso Hiper catálogo</h2>
+                    <p class="text-texto-secundario">Encontre o tema perfeito para sua festa. Filtre por nome, categoria ou tipo de kit para facilitar sua busca.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <input type="text" id="searchInput" placeholder="Pesquisar por nome ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg">
+                    <select id="categoryFilter" class="w-full p-3 border border-gray-300 rounded-lg"><option value="todas">Todas as Categorias</option></select>
+                    <select id="kitFilter" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <option value="todos">Todos os Kits</option>
+                        <option value="bronze">Bronze</option>
+                        <option value="prata">Prata</option>
+                        <option value="ouro">Ouro</option>
+                    </select>
+                </div>
+                <div class="flex justify-center gap-4">
+                    <button id="viewAllKitsBtn" class="btn-gradient btn-destaque font-bold py-2 px-6 rounded-lg">Ver todos os Kits</button>
+                    <button id="clearFiltersBtn" class="btn-gradient btn-primaria font-bold py-2 px-6 rounded-lg">Limpar Filtros</button>
                 </div>
             </section>
-        </div>
-        
-        <section id="addThemeFormContainer" class="hidden mb-8 p-4 sm:p-6 bg-surface rounded-lg shadow-md max-w-2xl mx-auto">
-             <h2 id="formTitle" class="text-xl sm:text-2xl font-bold mb-4 text-center">Cadastrar Novo Tema</h2>
-            <form id="addThemeForm">
-                <!-- Campos existentes -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="mb-4">
-                        <label for="themeName" class="block text-texto-secundario font-semibold mb-2">Nome do Tema</label>
-                        <input type="text" id="themeName" name="themeName" class="w-full p-3 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="themeCategory" class="block text-texto-secundario font-semibold mb-2">Categoria</label>
-                        <input type="text" id="themeCategory" name="themeCategory" list="categoryList" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Ex: Infantil, Casamento...">
-                        <datalist id="categoryList"></datalist>
-                    </div>
+            
+            <!-- Seção de Destaques (Carrossel) -->
+            <section id="featured-section" class="hidden mb-12">
+                 <div class="bg-primaria text-center py-4 rounded-t-lg">
+                    <h2 class="text-2xl font-bold text-white font-display">HIPER DESTAQUES</h2>
                 </div>
-                 <div class="mb-4">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="themeFeatured" name="themeFeatured" class="h-4 w-4 mr-2">
-                        Marcar como Destaque
-                    </label>
-                </div>
-                <div class="mb-4">
-                    <label for="themeCoverImage" class="block text-texto-secundario font-semibold mb-2">URL da Imagem de Capa</label>
-                    <input type="url" id="themeCoverImage" name="themeCoverImage" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Imagem principal que aparece no catálogo" required>
-                </div>
-                <div class="mb-6 p-4 border border-gray-200 rounded-lg">
-                    <label class="block text-texto-secundario font-semibold mb-2">Kits e Imagens Específicas</label>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" name="kits" value="bronze" class="h-4 w-4 mr-2 kit-checkbox"> Bronze</label>
-                            <input type="url" id="themeImageBronze" name="themeImageBronze" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Bronze">
-                        </div>
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" name="kits" value="prata" class="h-4 w-4 mr-2 kit-checkbox"> Prata</label>
-                            <input type="url" id="themeImagePrata" name="themeImagePrata" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Prata">
-                        </div>
-                        <div>
-                            <label class="flex items-center"><input type="checkbox" name="kits" value="ouro" class="h-4 w-4 mr-2 kit-checkbox"> Ouro</label>
-                            <input type="url" id="themeImageOuro" name="themeImageOuro" class="w-full p-2 mt-1 border border-gray-300 rounded-lg" placeholder="URL da imagem para o Kit Ouro">
+                <div class="relative bg-primaria p-4 rounded-b-lg shadow-inner">
+                    <div class="overflow-hidden">
+                        <div id="featured-container" class="flex transition-transform duration-500 ease-in-out">
+                            <!-- Cards de Destaque serão inseridos aqui -->
                         </div>
                     </div>
+                    <button id="prevBtn" class="carousel-btn left-0">&lt;</button>
+                    <button id="nextBtn" class="carousel-btn right-0">&gt;</button>
                 </div>
-                <div id="formMessage" class="text-erro text-center mb-4 font-semibold"></div>
-                <button type="submit" class="w-full bg-primaria hover:bg-primaria-escura text-texto-invertido font-bold py-3 px-4 rounded-lg transition">Salvar Tema</button>
-            </form>
-        </section>
+            </section>
 
-        <!-- Seção de Filtros -->
-        <section class="text-center mb-8 mt-8">
-            <h1 class="text-3xl font-bold text-primaria font-display">Conheça nosso Hiper catálogo</h1>
-            <p class="text-texto-secundario mt-2 max-w-2xl mx-auto">Encontre o tema perfeito para sua festa. Filtre por nome, categoria ou tipo de kit para facilitar sua busca.</p>
-        </section>
-        
-        <div class="mb-8 p-6 bg-surface rounded-lg shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="searchInput" placeholder="Pesquisar por nome ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg col-span-1 md:col-span-1">
-                <select id="categoryFilter" class="w-full p-3 border border-gray-300 rounded-lg col-span-1 md:col-span-1">
-                    <option value="todas">Todas as Categorias</option>
-                </select>
-                <select id="kitFilter" class="w-full p-3 border border-gray-300 rounded-lg col-span-1 md:col-span-1">
-                    <option value="todos">Todos os Kits</option>
-                    <option value="bronze">Bronze</option>
-                    <option value="prata">Prata</option>
-                    <option value="ouro">Ouro</option>
-                </select>
+            <div id="loadingIndicator" class="text-center py-10"><p class="text-lg text-texto-secundario">A carregar temas...</p></div>
+            
+            <div id="all-kits-title" class="bg-primaria text-center py-4 rounded-t-lg">
+                <h2 class="text-2xl font-bold text-white font-display">TODOS OS KITS</h2>
             </div>
-            <div class="flex justify-center gap-4 mt-4">
-                 <button id="viewAllKitsBtn" class="px-6 py-2 bg-destaque text-texto-principal rounded-lg font-semibold hover:bg-yellow-400 transition">Ver todos os Kits</button>
-                 <button id="clearFiltersBtn" class="px-6 py-2 bg-primaria text-texto-invertido rounded-lg font-semibold hover:bg-primaria-escura transition">Limpar Filtros</button>
-            </div>
-        </div>
-
-        <!-- Seção de Destaques -->
-        <section id="featured-section" class="mb-12">
-            <div class="bg-primaria text-center py-4 rounded-t-lg">
-                <h2 class="text-2xl font-bold text-white font-display">HIPER DESTAQUES</h2>
-            </div>
-            <div class="relative bg-primaria p-4 md:p-6 rounded-b-lg shadow-inner">
-                <div id="featured-carousel" class="overflow-hidden">
-                    <div id="featured-container" class="flex transition-transform duration-500 ease-in-out">
-                        <!-- Cards de Destaque serão inseridos aqui -->
-                    </div>
-                </div>
-                <button id="prevBtn" class="carousel-btn left-0 md:-left-4">&lt;</button>
-                <button id="nextBtn" class="carousel-btn right-0 md:-right-4">&gt;</button>
-            </div>
-        </section>
-        
-        <div id="all-kits-title" class="bg-primaria text-center py-4 rounded-t-lg">
-             <h2 class="text-2xl font-bold text-white font-display">TODOS OS KITS</h2>
-        </div>
-        <div class="bg-surface p-4 md:p-6 rounded-b-lg">
-            <div id="loadingIndicator" class="text-center py-10">
-                <p class="text-lg text-texto-secundario">A carregar temas...</p>
-            </div>
-            <div id="theme-catalog" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                 <!-- Cards de temas serão inseridos aqui -->
+            <div class="bg-surface p-4 md:p-6 rounded-b-lg">
+                <div id="theme-catalog" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8"></div>
             </div>
         </div>
     </main>
 
-    <!-- Modals (sem alterações visuais, apenas funcionais) -->
-    <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0 transition-opacity duration-300">
-        <div class="modal-content bg-fundo rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-2 sm:p-4 relative transform scale-95 transition-transform duration-300">
+    <!-- Modal de Adicionar/Editar Tema -->
+    <div id="formModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-40">
+        <div class="bg-surface rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
+             <button id="closeFormModalBtn" class="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-3xl z-10">&times;</button>
+             <h2 id="formTitle" class="text-2xl font-bold mb-4 text-center font-display">Cadastrar Tema</h2>
+            <form id="addThemeForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4"><input type="text" id="themeName" class="w-full p-3 border rounded-lg" placeholder="Nome do Tema" required></div>
+                    <div class="mb-4"><input type="text" id="themeCategory" list="categoryList" class="w-full p-3 border rounded-lg" placeholder="Categoria (Ex: Infantil)"></div>
+                </div>
+                <div class="mb-4"><input type="url" id="themeCoverImage" class="w-full p-3 border rounded-lg" placeholder="URL da Imagem de Capa" required></div>
+                <div class="mb-4"><label class="flex items-center gap-2"><input type="checkbox" id="themeFeatured" class="h-5 w-5">Marcar como Destaque</label></div>
+                <div class="mb-6 p-4 border rounded-lg space-y-3">
+                    <div><label><input type="checkbox" name="kits" value="bronze" class="mr-2">Bronze</label><input type="url" id="themeImageBronze" class="w-full p-2 mt-1 border rounded-lg" placeholder="URL da imagem - Kit Bronze"></div>
+                    <div><label><input type="checkbox" name="kits" value="prata" class="mr-2">Prata</label><input type="url" id="themeImagePrata" class="w-full p-2 mt-1 border rounded-lg" placeholder="URL da imagem - Kit Prata"></div>
+                    <div><label><input type="checkbox" name="kits" value="ouro" class="mr-2">Ouro</label><input type="url" id="themeImageOuro" class="w-full p-2 mt-1 border rounded-lg" placeholder="URL da imagem - Kit Ouro"></div>
+                </div>
+                <div id="formMessage" class="text-erro text-center mb-4 font-semibold"></div>
+                <button type="submit" class="w-full btn-gradient btn-primaria font-bold py-3 px-4 rounded-lg">Salvar Tema</button>
+            </form>
+            <datalist id="categoryList"></datalist>
+        </div>
+    </div>
+    
+    <!-- Modal de Detalhes do Tema -->
+    <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0">
+        <div class="modal-content bg-fundo rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto relative transform scale-95">
             <div class="bg-primaria text-center py-3 rounded-t-lg relative">
                 <h2 id="modalThemeName" class="text-xl sm:text-2xl font-bold text-white font-display">Nome do Tema</h2>
                 <button id="closeModalBtn" class="absolute top-1/2 -translate-y-1/2 right-3 text-white text-3xl hover:text-gray-200">&times;</button>
             </div>
-            <div id="modalKitsContainer" class="p-4 space-y-4">
-                 <!-- Detalhes do kit serão inseridos aqui -->
+            <div class="p-4 space-y-4">
+                <div id="modalScheduledDatesContainer"></div>
+                <div id="modalKitsContainer" class="space-y-4"></div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Outros Modais (Agendamento, Orçamento, Imagem, Alerta) -->
     <div id="rentalModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
-        <div class="bg-surface rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
+        <div class="bg-surface rounded-lg shadow-2xl p-8 w-full max-w-md">
             <h3 id="rentalThemeInfo" class="text-xl font-bold mb-4">Agendar Aluguer</h3>
-            <form id="rentalForm">
-                <div class="mb-4">
-                    <label for="rentalClientName" class="block text-texto-secundario font-semibold mb-2">Nome do Cliente:</label>
-                    <input type="text" id="rentalClientName" name="rentalClientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="mb-4">
-                    <label for="rentalClientPhone" class="block text-texto-secundario font-semibold mb-2">Telefone do Cliente:</label>
-                    <input type="tel" id="rentalClientPhone" name="rentalClientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="mb-4">
-                    <label for="startDate" class="block text-texto-secundario font-semibold mb-2">Data de Início do Aluguer:</label>
-                    <input type="date" id="startDate" name="startDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="mb-6">
-                    <label for="endDate" class="block text-texto-secundario font-semibold mb-2">Data de Fim do Aluguer:</label>
-                    <input type="date" id="endDate" name="endDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="flex justify-end gap-4">
-                    <button type="button" id="closeRentalModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="bg-sucesso text-texto-invertido px-6 py-2 rounded-lg hover:bg-green-600">Salvar Agendamento</button>
+            <form id="rentalForm" class="space-y-4">
+                <input type="text" id="rentalClientName" placeholder="Nome do Cliente" required class="w-full px-4 py-2 border rounded-lg">
+                <input type="tel" id="rentalClientPhone" placeholder="Telefone do Cliente" required class="w-full px-4 py-2 border rounded-lg">
+                <div><label class="text-sm">Data de Início:</label><input type="date" id="startDate" required class="w-full px-4 py-2 border rounded-lg"></div>
+                <div><label class="text-sm">Data de Fim:</label><input type="date" id="endDate" required class="w-full px-4 py-2 border rounded-lg"></div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" id="closeRentalModalBtn" class="bg-gray-300 px-6 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="btn-gradient btn-sucesso px-6 py-2 rounded-lg">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
     <div id="quoteModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">
-        <div class="bg-surface rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
+        <div class="bg-surface rounded-lg shadow-2xl p-8 w-full max-w-md">
             <h3 id="quoteThemeInfo" class="text-xl font-bold mb-2">Solicitar Orçamento</h3>
             <p class="text-texto-secundario mb-4">Preencha os seus dados para continuar no WhatsApp.</p>
-            <form id="quoteForm">
-                <div class="mb-4">
-                    <label for="clientName" class="block text-texto-secundario font-semibold mb-2">O seu Nome:</label>
-                    <input type="text" id="clientName" name="clientName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="mb-4">
-                    <label for="clientPhone" class="block text-texto-secundario font-semibold mb-2">O seu Telefone (WhatsApp):</label>
-                    <input type="tel" id="clientPhone" name="clientPhone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="mb-6">
-                    <label for="eventDate" class="block text-texto-secundario font-semibold mb-2">Data do Evento:</label>
-                    <input type="date" id="eventDate" name="eventDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primaria">
-                </div>
-                <div class="flex flex-col-reverse sm:flex-row justify-end gap-4">
-                    <button type="button" id="closeQuoteModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="whatsapp-btn flex items-center justify-center gap-2 bg-sucesso text-texto-invertido font-bold px-6 py-2 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
-                        Continuar
-                    </button>
+            <form id="quoteForm" class="space-y-4">
+                <input type="text" id="clientName" placeholder="O seu Nome" required class="w-full px-4 py-2 border rounded-lg">
+                <input type="tel" id="clientPhone" placeholder="O seu Telefone (WhatsApp)" required class="w-full px-4 py-2 border rounded-lg">
+                <div><label class="text-sm">Data do Evento:</label><input type="date" id="eventDate" required class="w-full px-4 py-2 border rounded-lg"></div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" id="closeQuoteModalBtn" class="bg-gray-300 px-6 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="btn-gradient btn-sucesso px-6 py-2 rounded-lg flex items-center gap-2">Continuar <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg></button>
                 </div>
             </form>
         </div>
     </div>
-    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transition-opacity duration-300">
+    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0">
         <button id="closeImageModalBtn" class="absolute top-4 right-4 text-white text-5xl font-light z-10">&times;</button>
-        <div class="relative">
-            <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-lg">
-        </div>
+        <img id="lightboxImage" src="" alt="Imagem do Kit em Destaque" class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg">
     </div>
     <div id="alertModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-surface rounded-lg shadow-2xl p-6 w-full max-w-sm text-center">
-            <h3 id="alertTitle" class="text-xl font-bold mb-4 text-texto-principal">Aviso</h3>
+            <h3 id="alertTitle" class="text-xl font-bold mb-4">Aviso</h3>
             <p id="alertMessage" class="text-texto-secundario mb-6"></p>
-            <button id="closeAlertBtn" class="bg-primaria text-texto-invertido px-8 py-2 rounded-lg hover:bg-primaria-escura">OK</button>
+            <button id="closeAlertBtn" class="btn-gradient btn-primaria px-8 py-2 rounded-lg">OK</button>
         </div>
     </div>
     
-    <!-- SCRIPTS DO FIREBASE (Versão 8) -->
+    <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    
     <script src="script.js"></script>
 
     <!-- Rodapé -->
     <footer class="bg-surface text-texto-secundario p-6 mt-12 border-t">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2025 Hiper Festa. Todos os direitos reservados.</p>
-            <p class="text-sm mt-2">Av. Cel. Teodolino Pereira Araújo, 2225 - Centro, Araguari - MG | Telefone: (34) 3512-9843</p>
-        </div>
+        <div class="container mx-auto text-center"><p>&copy; 2025 Hiper Festa. Todos os direitos reservados.</p></div>
     </footer>
 </body>
 </html>
-

@@ -30,16 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ELEMENTOS DA PÁGINA ---
     const loginScreen = document.getElementById('loginScreen');
     const mainContent = document.getElementById('mainContent');
+    const reportsScreen = document.getElementById('reportsScreen');
+    const rentalsScreen = document.getElementById('rentalsScreen');
+    const monthlyRentalsContainer = document.getElementById('monthlyRentalsContainer');
+    const formModal = document.getElementById('formModal');
+    const closeFormModalBtn = document.getElementById('closeFormModalBtn');
+
+    // Elementos do Cabeçalho
+    const navLinks = document.querySelectorAll('.nav-link');
     const homeLink = document.getElementById('homeLink');
     const loginLink = document.getElementById('loginLink');
-    const adminPanelLink = document.getElementById('adminPanelLink');
+    const reportsLink = document.getElementById('reportsLink');
+    const rentalsLink = document.getElementById('rentalsLink');
     const logoutBtn = document.getElementById('logoutBtn');
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileHomeLink = document.getElementById('mobileHomeLink');
     const mobileLoginLink = document.getElementById('mobileLoginLink');
-    const mobileAdminPanelLink = document.getElementById('mobileAdminPanelLink');
+    const mobileReportsLink = document.getElementById('mobileReportsLink');
+    const mobileRentalsLink = document.getElementById('mobileRentalsLink');
     const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
     const loginForm = document.getElementById('loginForm');
     const loginMessage = document.getElementById('loginMessage');
     const adminControls = document.getElementById('adminControls');
@@ -50,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const kitFilter = document.getElementById('kitFilter');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
     const viewAllKitsBtn = document.getElementById('viewAllKitsBtn');
-    const addThemeFormContainer = document.getElementById('addThemeFormContainer');
     const addThemeForm = document.getElementById('addThemeForm');
     const formTitle = document.getElementById('formTitle');
     const formMessage = document.getElementById('formMessage');
@@ -58,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeModal = document.getElementById('themeModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const modalThemeName = document.getElementById('modalThemeName');
+    const modalScheduledDatesContainer = document.getElementById('modalScheduledDatesContainer');
     const modalKitsContainer = document.getElementById('modalKitsContainer');
     const imageModal = document.getElementById('imageModal');
     const closeImageModalBtn = document.getElementById('closeImageModalBtn');
@@ -100,16 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchThemes();
         });
 
-        // Listeners de navegação e filtros
-        [loginLink, mobileLoginLink].forEach(el => el.addEventListener('click', showLoginScreen));
-        [homeLink, mobileHomeLink, adminPanelLink, mobileAdminPanelLink].forEach(el => el.addEventListener('click', showCatalog));
+        // Listeners de navegação
+        [homeLink, mobileHomeLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'catalog')));
+        [reportsLink, mobileReportsLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'reports')));
+        [rentalsLink, mobileRentalsLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'rentals')));
+        [loginLink, mobileLoginLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'login')));
         [logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', () => auth.signOut()));
+
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
-            mobileMenuBtn.querySelectorAll('svg').forEach(icon => icon.classList.toggle('hidden'));
+            const icons = mobileMenuBtn.querySelectorAll('svg');
+            icons[0].classList.toggle('hidden');
+            icons[1].classList.toggle('hidden');
         });
 
-        // Listeners dos Filtros
+        // Listeners dos Filtros e Modais
         searchInput.addEventListener('input', () => updateView({ scrollToKits: true }));
         categoryFilter.addEventListener('change', () => updateView({ scrollToKits: true }));
         kitFilter.addEventListener('change', () => updateView({ scrollToKits: true }));
@@ -131,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         downloadReportBtn.addEventListener('click', downloadReport);
         closeAlertBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
+        closeFormModalBtn.addEventListener('click', () => formModal.classList.add('hidden'));
 
         // Listeners do Carrossel
         prevBtn.addEventListener('click', () => moveCarousel(-1));
@@ -158,30 +175,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LÓGICA DE NAVEGAÇÃO E UI ---
+    function showScreen(e, screenName) {
+        if (e) e.preventDefault();
+        mainContent.classList.add('hidden');
+        loginScreen.classList.add('hidden');
+        reportsScreen.classList.add('hidden');
+        rentalsScreen.classList.add('hidden');
+        navLinks.forEach(link => link.classList.remove('active'));
+        if (screenName === 'catalog') {
+            mainContent.classList.remove('hidden');
+            homeLink.classList.add('active');
+            mobileHomeLink.classList.add('active');
+        } else if (screenName === 'login') {
+            loginScreen.classList.remove('hidden');
+        } else if (screenName === 'reports') {
+            reportsScreen.classList.remove('hidden');
+            reportsLink.classList.add('active');
+            mobileReportsLink.classList.add('active');
+        } else if (screenName === 'rentals') {
+            rentalsScreen.classList.remove('hidden');
+            displayMonthlyRentals();
+            rentalsLink.classList.add('active');
+            mobileRentalsLink.classList.add('active');
+        }
+        mobileMenu.classList.add('hidden');
+        const icons = mobileMenuBtn.querySelectorAll('svg');
+        icons[0].classList.remove('hidden');
+        icons[1].classList.add('hidden');
+    }
+
     function updateUIBasedOnAuthState(user) {
         const isAdmin = !!user;
         loginLink.classList.toggle('hidden', isAdmin);
-        adminPanelLink.classList.toggle('hidden', !isAdmin);
-        logoutBtn.classList.toggle('hidden', !isAdmin);
         mobileLoginLink.classList.toggle('hidden', isAdmin);
-        mobileAdminPanelLink.classList.toggle('hidden', !isAdmin);
+        logoutBtn.classList.toggle('hidden', !isAdmin);
         mobileLogoutBtn.classList.toggle('hidden', !isAdmin);
+        reportsLink.classList.toggle('hidden', !isAdmin);
+        mobileReportsLink.classList.toggle('hidden', !isAdmin);
+        rentalsLink.classList.toggle('hidden', !isAdmin);
+        mobileRentalsLink.classList.toggle('hidden', !isAdmin);
         adminControls.classList.toggle('hidden', !isAdmin);
-        showCatalog();
-    }
-
-    function showLoginScreen(e) {
-        if (e) e.preventDefault();
-        mainContent.classList.add('hidden');
-        loginScreen.classList.remove('hidden');
-        mobileMenu.classList.add('hidden');
-    }
-
-    function showCatalog(e) {
-        if (e) e.preventDefault();
-        loginScreen.classList.add('hidden');
-        mainContent.classList.remove('hidden');
-        mobileMenu.classList.add('hidden');
+        if (!isAdmin) {
+            showScreen(null, 'catalog');
+        }
     }
 
     loginForm.addEventListener('submit', (e) => {
@@ -189,6 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = e.target.email.value;
         const password = e.target.password.value;
         auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                showScreen(null, 'catalog');
+            })
             .catch(error => {
                 loginMessage.textContent = "Email ou senha inválidos.";
                 console.error("Erro de login:", error);
@@ -228,44 +267,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createThemeCard(theme, isFeatured = false) {
         const isRentedToday = isThemeRentedOnDate(theme, new Date().toISOString().split('T')[0]);
-        const card = document.createElement('div');
-        card.className = `theme-card bg-surface rounded-xl shadow-md overflow-hidden flex flex-col ${isFeatured ? 'featured-card' : ''}`;
+
+        const cardContent = document.createElement('div');
+        cardContent.className = `theme-card bg-surface rounded-xl shadow-md overflow-hidden flex flex-col h-full`;
 
         let availableKitsHtml = (theme.kits || []).map(kit =>
             `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`
         ).join(' ');
 
-        card.innerHTML = `
+        cardContent.innerHTML = `
             <div class="relative">
                 <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
                 ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
             </div>
             <div class="p-4 flex flex-col flex-grow">
                 <div class="flex justify-between items-start">
-                     <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2">${theme.name}</h3>
-                     <div class="flex flex-shrink-0 gap-2">
+                     <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2 min-w-0">${theme.name}</h3>
+                     <div class="flex flex-shrink-0 gap-1">
                         ${availableKitsHtml}
                     </div>
                 </div>
                 <p class="text-sm text-texto-secundario mb-4">${theme.category || 'Sem Categoria'}</p>
                 <div class="mt-auto">
-                    <button class="details-btn w-full bg-primaria text-texto-invertido font-bold py-2 px-4 rounded-lg hover:bg-primaria-escura transition" data-id="${theme.id}">
+                    <button class="details-btn w-full btn-gradient btn-primaria text-texto-invertido font-bold py-2 px-4 rounded-lg" data-id="${theme.id}">
                         Ver detalhes
                     </button>
                 </div>
             </div>
         `;
-        card.querySelector('.details-btn').addEventListener('click', () => openThemeModal(theme.id));
-        return card;
+        cardContent.querySelector('.details-btn').addEventListener('click', () => openThemeModal(theme.id));
+
+        if (isFeatured) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 p-2';
+            wrapper.appendChild(cardContent);
+            return wrapper;
+        }
+
+        return cardContent;
     }
 
     function displayFilteredThemes() {
         const searchTerm = searchInput.value.toLowerCase();
         const activeCategory = categoryFilter.value;
         const activeKit = kitFilter.value;
-
         let filteredThemes = themes;
-
         if (activeCategory !== 'todas') {
             filteredThemes = filteredThemes.filter(theme => theme.category === activeCategory);
         }
@@ -278,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 (theme.category && theme.category.toLowerCase().includes(searchTerm))
             );
         }
-
         catalogContainer.innerHTML = '';
         if (filteredThemes.length === 0) {
             catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
@@ -295,21 +340,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeCategory = categoryFilter.value;
         const activeKit = kitFilter.value;
         const isAnyFilterActive = searchTerm || activeCategory !== 'todas' || activeKit !== 'todos';
-
         const featuredThemes = themes.filter(theme => theme.featured);
         if (isAnyFilterActive || forceHideFeatured) {
             featuredSection.classList.add('hidden');
         } else {
-            if (featuredThemes.length > 0) {
-                featuredSection.classList.remove('hidden');
-            }
+            featuredSection.classList.toggle('hidden', featuredThemes.length === 0);
         }
-
         displayFilteredThemes();
-
         if (scrollToKits) {
             document.getElementById('all-kits-title').scrollIntoView({ behavior: 'smooth' });
         }
+    }
+
+    function displayMonthlyRentals() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        const monthlyRentals = [];
+        themes.forEach(theme => {
+            (theme.rentals || []).forEach(rental => {
+                const rentalStartDate = new Date(rental.startDate);
+                if (rentalStartDate.getUTCFullYear() === currentYear && rentalStartDate.getUTCMonth() === currentMonth) {
+                    monthlyRentals.push({ ...rental, themeName: theme.name });
+                }
+            });
+        });
+        monthlyRentals.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+        if (monthlyRentals.length === 0) {
+            monthlyRentalsContainer.innerHTML = '<p class="text-center text-texto-secundario">Nenhum item alugado para este mês.</p>';
+            return;
+        }
+        monthlyRentalsContainer.innerHTML = monthlyRentals.map(rental => `
+            <div class="bg-surface p-4 rounded-lg shadow-md flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-texto-principal">${rental.themeName} (Kit ${rental.kit})</p>
+                    <p class="text-sm text-texto-secundario">Cliente: ${rental.clientName || 'Não informado'}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-semibold text-primaria">${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+                    <p class="text-sm text-texto-secundario">a ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+                </div>
+            </div>
+        `).join('');
     }
 
     // --- LÓGICA DO CARROSSEL ---
@@ -328,24 +400,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function moveCarousel(direction) {
-        const featuredThemes = themes.filter(theme => theme.featured);
+        const carouselItems = featuredContainer.children.length;
+        if (carouselItems === 0) return;
+
         const itemsPerPage = window.innerWidth < 640 ? 2 : (window.innerWidth < 1024 ? 3 : 4);
-        const maxIndex = Math.ceil(featuredThemes.length / itemsPerPage) - 1;
+        const maxIndex = Math.ceil(carouselItems / itemsPerPage) - 1;
 
-        carouselIndex += direction;
-
-        if (carouselIndex < 0) {
-            carouselIndex = 0;
-        }
-        if (carouselIndex > maxIndex) {
-            carouselIndex = maxIndex;
-        }
+        carouselIndex = Math.max(0, Math.min(carouselIndex + direction, maxIndex));
         updateCarousel();
     }
 
     function updateCarousel() {
-        const offset = -carouselIndex * 100;
-        featuredContainer.style.transform = `translateX(${offset}%)`;
+        const percentageOffset = carouselIndex * 100;
+        featuredContainer.style.transform = `translateX(-${percentageOffset}%)`;
     }
 
     window.addEventListener('resize', () => {
@@ -357,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editingThemeId = null;
         formTitle.textContent = "Adicionar Novo Tema";
         addThemeForm.reset();
-        addThemeFormContainer.classList.toggle('hidden');
+        formModal.classList.remove('hidden');
     });
 
     addThemeForm.addEventListener('submit', async e => {
@@ -390,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await themesCollection.add(themeData);
             }
             addThemeForm.reset();
-            addThemeFormContainer.classList.add('hidden');
+            formModal.classList.add('hidden');
         } catch (error) {
             console.error("Erro ao salvar tema: ", error);
             formMessage.textContent = "Erro ao salvar. Tente novamente.";
@@ -421,28 +488,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalThemeName.textContent = theme.name;
         modalKitsContainer.innerHTML = '';
+        modalScheduledDatesContainer.innerHTML = '';
+
+        if (theme.rentals && theme.rentals.length > 0) {
+            const rentalsSection = document.createElement('div');
+            rentalsSection.className = 'pb-4 border-b text-center';
+            let rentalsListHtml = '<h5 class="font-semibold mb-2 text-lg">Datas Agendadas</h5>';
+            rentalsListHtml += '<ul class="list-none text-sm text-texto-secundario space-y-1">';
+            theme.rentals.forEach((rental, index) => {
+                const deleteButton = currentUser ?
+                    `<button class="delete-rental-btn text-erro hover:text-red-700 font-bold ml-4" data-theme-id="${theme.id}" data-rental-index="${index}">Excluir</button>` : '';
+                rentalsListHtml += `
+                    <li class="flex justify-center items-center">
+                        <span>
+                            <b>${currentUser ? (rental.clientName || 'Cliente') + ` (Kit ${rental.kit})` : 'Indisponível'}:</b> 
+                            ${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} a ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                        </span>
+                        ${deleteButton}
+                    </li>
+                `;
+            });
+            rentalsListHtml += '</ul>';
+            rentalsSection.innerHTML = rentalsListHtml;
+            modalScheduledDatesContainer.appendChild(rentalsSection);
+        }
 
         (theme.kits || []).forEach(kit => {
             const kitImage = theme.images?.[kit] || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem';
             const kitDiv = document.createElement('div');
             kitDiv.className = 'modal-kit-card';
-
             let actionButton;
             if (currentUser) {
-                actionButton = `
-                    <button class="rent-btn modal-action-btn bg-primaria text-texto-invertido hover:bg-primaria-escura" data-theme-id="${theme.id}" data-kit="${kit}">
-                        Agendar
-                    </button>`;
+                actionButton = `<button class="rent-btn modal-action-btn btn-gradient btn-primaria" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>`;
             } else {
                 const whatsappIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>`;
-                actionButton = `
-                    <button class="quote-btn modal-action-btn bg-primaria text-texto-invertido hover:bg-primaria-escura" data-theme-id="${theme.id}" data-kit="${kit}">
-                        Solicitar Orçamento ${whatsappIcon}
-                    </button>`;
+                actionButton = `<button class="quote-btn modal-action-btn btn-gradient btn-primaria" data-theme-id="${theme.id}" data-kit="${kit}">Solicitar Orçamento ${whatsappIcon}</button>`;
             }
-
             const kitName = kit.charAt(0).toUpperCase() + kit.slice(1);
-
             kitDiv.innerHTML = `
                 <img src="${kitImage}" alt="Imagem do Kit ${kitName}" class="w-full object-cover rounded-lg shadow-md kit-image" data-src="${kitImage}">
                 <p class="modal-kit-title mt-4">Pegue Monte - ${theme.name}</p>
@@ -455,38 +537,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (currentUser) {
-            const adminSection = document.createElement('div');
-            adminSection.className = 'mt-6 pt-4 border-t';
-
-            const adminButtons = `
-                <div class="flex flex-wrap gap-4 justify-center">
-                    <button class="edit-btn bg-secundaria hover:bg-amber-500 text-texto-principal font-bold px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
-                    <button class="delete-btn bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
-                </div>
+            const adminButtons = document.createElement('div');
+            adminButtons.className = 'mt-6 pt-4 border-t flex flex-wrap gap-4 justify-center';
+            adminButtons.innerHTML = `
+                <button class="edit-btn btn-gradient btn-secundaria text-texto-principal" data-theme-id="${theme.id}">Editar Tema</button>
+                <button class="delete-btn btn-gradient btn-erro" data-theme-id="${theme.id}">Excluir Tema</button>
             `;
-
-            let rentalsListHtml = '';
-            if (theme.rentals && theme.rentals.length > 0) {
-                rentalsListHtml += '<h5 class="font-semibold mb-2 mt-6 text-lg text-center">Agendamentos do Tema:</h5>';
-                rentalsListHtml += '<ul class="list-disc list-inside text-sm text-texto-secundario space-y-2">';
-                theme.rentals.forEach((rental, index) => {
-                    rentalsListHtml += `
-                        <li class="flex justify-between items-center">
-                            <span>
-                                <b>${rental.clientName || 'Cliente'}</b> (Kit ${rental.kit}): 
-                                ${new Date(rental.startDate).toLocaleDateString()} a ${new Date(rental.endDate).toLocaleDateString()}
-                            </span>
-                            <button class="delete-rental-btn text-erro hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">
-                                Excluir
-                            </button>
-                        </li>
-                    `;
-                });
-                rentalsListHtml += '</ul>';
-            }
-
-            adminSection.innerHTML = adminButtons + rentalsListHtml;
-            modalKitsContainer.appendChild(adminSection);
+            modalKitsContainer.appendChild(adminButtons);
         }
 
         themeModal.classList.remove('hidden');
@@ -502,18 +559,18 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => themeModal.classList.add('hidden'), 300);
     });
 
-    modalKitsContainer.addEventListener('click', e => {
-        const targetButton = e.target.closest('button');
+    modalKitsContainer.addEventListener('click', e => handleModalInteraction(e));
+    modalScheduledDatesContainer.addEventListener('click', e => handleModalInteraction(e));
 
+    function handleModalInteraction(e) {
+        const targetButton = e.target.closest('button');
         if (e.target.classList.contains('kit-image')) {
             lightboxImage.src = e.target.dataset.src;
             imageModal.classList.remove('hidden');
             setTimeout(() => imageModal.classList.remove('opacity-0'), 10);
             return;
         }
-
         if (!targetButton) return;
-
         const dataset = targetButton.dataset;
         if (targetButton.classList.contains('edit-btn')) {
             const id = dataset.themeId;
@@ -530,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addThemeForm.themeImageBronze.value = theme.images?.bronze || '';
             addThemeForm.themeImagePrata.value = theme.images?.prata || '';
             addThemeForm.themeImageOuro.value = theme.images?.ouro || '';
-            addThemeFormContainer.classList.remove('hidden');
+            formModal.classList.remove('hidden');
             closeModalBtn.click();
         }
         if (targetButton.classList.contains('delete-btn')) {
@@ -561,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteRental(themeId, rentalIndex);
             }
         }
-    });
+    }
 
     closeImageModalBtn.addEventListener('click', () => {
         imageModal.classList.add('opacity-0');
@@ -588,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const themeData = doc.data();
                 if (isThemeRentedOnDate(themeData, startDate, endDate)) {
                     showAlert('Este tema já está agendado para este período. Por favor, verifique as datas.', 'Conflito de Agendamento');
-                    throw "Conflito de agendamento!";
+                    throw new Error("Conflito de agendamento!");
                 }
                 const rentals = themeData.rentals || [];
                 rentals.push({
@@ -605,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModalBtn.click();
         } catch (error) {
             console.error("Erro no agendamento: ", error);
-            if (error !== "Conflito de agendamento!") {
+            if (error.message !== "Conflito de agendamento!") {
                 showAlert("Não foi possível agendar. Tente novamente.", "Erro");
             }
         }
