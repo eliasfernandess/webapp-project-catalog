@@ -1,43 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--cor-fundo);
     color: var(--cor-texto-principal);
 }
 
-h1, h2, h3 {
-     font-family: 'Poppins', sans-serif;
+.font-display {
+    font-family: 'Poppins', sans-serif;
 }
 
-.flex-grow {
-    flex-grow: 1;
+/* Estilos para os Kit Badges nos Cards */
+.kit-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--cor-texto-principal);
+    border: 2px solid var(--cor-texto-principal);
 }
 
+.kit-badge-b { background-color: #f97316; /* orange-500 */ color: white; border-color: #f97316; }
+.kit-badge-p { background-color: #a8a29e; /* stone-400 */ color: white; border-color: #a8a29e; }
+.kit-badge-o { background-color: #facc15; /* yellow-400 */ color: var(--cor-texto-principal); border-color: #facc15; }
+
+/* Efeito de hover e transição para os cartões */
 .theme-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .theme-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.kit-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 14px;
-    color: white;
+/* Deixa o cursor do rato como um ponteiro para imagens clicáveis */
+.kit-image {
+    cursor: pointer;
 }
 
-.kit-badge-b { background-color: #F97316; } /* Laranja */
-.kit-badge-p { background-color: #A8A29E; } /* Cinza */
-.kit-badge-o { background-color: #FACC15; } /* Amarelo */
 
-/* Animações de entrada e saída para os modais */
-#themeModal, #imageModal, #alertModal, #rentalModal, #quoteModal {
+/* Estilos para o novo Modal de Detalhes */
+.modal-content {
+    transition: transform 0.3s ease;
+}
+
+#themeModal {
     transition: opacity 0.3s ease;
 }
+
+.modal-kit-card {
+    border: 2px solid var(--cor-primaria);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background-color: var(--cor-surface);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.modal-kit-card img {
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border: 1px solid #e5e7eb; /* Borda cinza clara */
+}
+
+.modal-kit-title {
+    font-weight: 600;
+    font-size: 1.125rem; /* text-lg */
+    color: var(--cor-texto-principal);
+}
+
+.kit-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px; /* rounded-full */
+    font-weight: 600;
+    font-size: 0.875rem; /* text-sm */
+    margin: 0.5rem 0;
+}
+
+.kit-tag-bronze {
+    background-color: #f97316; /* orange-500 */
+    color: white;
+}
+.kit-tag-prata {
+    background-color: #a8a29e; /* stone-400 */
+    color: white;
+}
+.kit-tag-ouro {
+    background-color: #facc15; /* yellow-400 */
+    color: var(--cor-texto-principal);
+}
+
+.kit-price {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: 700;
+    color: var(--cor-primaria);
+    margin: 0.25rem 0;
+}
+
+.kit-obs {
+    font-size: 0.75rem; /* text-xs */
+    color: var(--cor-texto-secundario);
+    margin-bottom: 1rem;
+}
+
+.modal-action-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Correção para o nome do tema não cortar os emblemas no celular */
+.theme-card h3 {
+    min-width: 0; /* Permite que o elemento flexível encolha abaixo do tamanho do seu conteúdo */
+}
+

@@ -151,7 +151,7 @@
             </section>
         </div>
 
-        <section class="bg-surface p-6 rounded-2xl shadow-lg -mt-24 relative z-10 mb-10">
+        <section class="bg-surface p-6 rounded-2xl shadow-lg mt-8 mb-10">
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold text-primaria">Conheça nosso Hiper catálogo</h2>
                 <p class="text-texto-secundario mt-2 max-w-2xl mx-auto">Encontre o tema perfeito para sua festa. Filtre por nome, categoria ou tipo de kit para facilitar sua busca.</p>
@@ -184,15 +184,19 @@
             <p class="text-lg text-texto-secundario">Carregando temas...</p>
         </div>
 
-        <section id="theme-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"></section>
+        <section id="theme-catalog" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"></section>
     </main>
 
     <!-- Modals -->
     <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0 transition-opacity duration-300">
-        <div class="modal-content bg-surface rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative transform scale-95 transition-transform duration-300">
-            <button id="closeModalBtn" class="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal text-3xl z-10">&times;</button>
-            <h2 id="modalThemeName" class="text-2xl sm:text-3xl font-bold text-center mb-6">Nome do Tema</h2>
-            <div id="modalKitsContainer"></div>
+        <div class="modal-content bg-surface rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between p-4 border-b bg-primaria text-texto-invertido rounded-t-lg">
+                <h2 id="modalThemeName" class="text-xl font-bold">Nome do Tema</h2>
+                <button id="closeModalBtn" class="text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div id="modalKitsContainer" class="p-4 sm:p-6 overflow-y-auto">
+                <!-- Kit cards will be injected here by script.js -->
+            </div>
         </div>
     </div>
     <div id="rentalModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40">

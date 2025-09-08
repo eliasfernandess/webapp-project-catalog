@@ -335,60 +335,71 @@ document.addEventListener('DOMContentLoaded', () => {
         modalKitsContainer.innerHTML = '';
 
         (theme.kits || []).forEach(kit => {
+            const kitImage = theme.images?.[kit] || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem';
             const kitDiv = document.createElement('div');
-            kitDiv.className = 'mb-6 p-4 border rounded-lg';
-            const kitImage = theme.images?.[kit] || 'https://placehold.co/600x400/e2e8f0/adb5bd?text=Sem+Imagem';
+            kitDiv.className = 'modal-kit-card';
 
-            let actionButtonHtml = '';
+            let actionButton;
             if (currentUser) {
-                actionButtonHtml = `<button class="rent-btn bg-primaria hover:bg-primaria-escura text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">Agendar</button>`;
+                actionButton = `
+                    <button class="rent-btn modal-action-btn bg-primaria text-texto-invertido hover:bg-primaria-escura" data-theme-id="${theme.id}" data-kit="${kit}">
+                        Agendar
+                    </button>`;
             } else {
-                actionButtonHtml = `<button class="quote-btn flex items-center gap-2 bg-sucesso text-texto-invertido font-bold px-6 py-2 rounded-lg" data-theme-id="${theme.id}" data-kit="${kit}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
-                    Solicitar Orçamento
-                </button>`;
+                const whatsappIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>`;
+                actionButton = `
+                    <button class="quote-btn modal-action-btn bg-primaria text-texto-invertido hover:bg-primaria-escura" data-theme-id="${theme.id}" data-kit="${kit}">
+                        Solicitar Orçamento ${whatsappIcon}
+                    </button>`;
             }
 
+            const kitName = kit.charAt(0).toUpperCase() + kit.slice(1);
+
             kitDiv.innerHTML = `
-                <div class="flex flex-col md:flex-row gap-6">
-                    <img src="${kitImage}" alt="Imagem do Kit ${kit}" class="w-full md:w-1/3 rounded-lg shadow-md kit-image" data-src="${kitImage}">
-                    <div class="flex-grow">
-                        <h4 class="text-2xl font-bold capitalize ${kitDetails[kit]?.class} inline-block px-3 py-1 rounded-md">${kit} - ${kitDetails[kit]?.price}</h4>
-                        <div class="mt-6 flex flex-wrap gap-4">
-                            ${actionButtonHtml}
-                            ${currentUser ? `
-                                <button class="edit-btn bg-secundaria hover:bg-amber-500 text-texto-principal font-bold px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
-                                <button class="delete-btn bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
+                <img src="${kitImage}" alt="Imagem do Kit ${kitName}" class="w-full object-cover rounded-lg shadow-md kit-image" data-src="${kitImage}">
+                <p class="modal-kit-title mt-4">Pegue Monte - ${theme.name}</p>
+                <span class="kit-tag kit-tag-${kit}">${kitName}</span>
+                <p class="kit-price">${kitDetails[kit]?.price || ''}</p>
+                <p class="kit-obs">Obs: Clique na imagem para ver ela completa.</p>
+                ${actionButton}
             `;
             modalKitsContainer.appendChild(kitDiv);
         });
 
-        if (currentUser && theme.rentals && theme.rentals.length > 0) {
-            const rentalsTitle = document.createElement('h5');
-            rentalsTitle.className = 'font-semibold mb-2 mt-6 text-xl';
-            rentalsTitle.textContent = 'Agendamentos do Tema:';
-            modalKitsContainer.appendChild(rentalsTitle);
-            const rentalsList = document.createElement('ul');
-            rentalsList.className = 'list-disc list-inside text-sm text-texto-secundario space-y-2';
-            theme.rentals.forEach((rental, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'flex justify-between items-center';
-                listItem.innerHTML = `
-                    <span>
-                        <b>${rental.clientName || 'Cliente'}</b> (Kit ${rental.kit}): 
-                        ${new Date(rental.startDate).toLocaleDateString()} a ${new Date(rental.endDate).toLocaleDateString()}
-                    </span>
-                    <button class="delete-rental-btn text-erro hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">
-                        Excluir
-                    </button>
-                `;
-                rentalsList.appendChild(listItem);
-            });
-            modalKitsContainer.appendChild(rentalsList);
+        // Manter botões de admin e lista de agendamentos
+        if (currentUser) {
+            const adminSection = document.createElement('div');
+            adminSection.className = 'mt-6 pt-4 border-t';
+
+            const adminButtons = `
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button class="edit-btn bg-secundaria hover:bg-amber-500 text-texto-principal font-bold px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Editar Tema</button>
+                    <button class="delete-btn bg-erro hover:bg-red-600 text-texto-invertido px-4 py-2 rounded-lg" data-theme-id="${theme.id}">Excluir Tema</button>
+                </div>
+            `;
+
+            let rentalsListHtml = '';
+            if (theme.rentals && theme.rentals.length > 0) {
+                rentalsListHtml += '<h5 class="font-semibold mb-2 mt-6 text-lg text-center">Agendamentos do Tema:</h5>';
+                rentalsListHtml += '<ul class="list-disc list-inside text-sm text-texto-secundario space-y-2">';
+                theme.rentals.forEach((rental, index) => {
+                    rentalsListHtml += `
+                        <li class="flex justify-between items-center">
+                            <span>
+                                <b>${rental.clientName || 'Cliente'}</b> (Kit ${rental.kit}): 
+                                ${new Date(rental.startDate).toLocaleDateString()} a ${new Date(rental.endDate).toLocaleDateString()}
+                            </span>
+                            <button class="delete-rental-btn text-erro hover:text-red-700 font-bold" data-theme-id="${theme.id}" data-rental-index="${index}">
+                                Excluir
+                            </button>
+                        </li>
+                    `;
+                });
+                rentalsListHtml += '</ul>';
+            }
+
+            adminSection.innerHTML = adminButtons + rentalsListHtml;
+            modalKitsContainer.appendChild(adminSection);
         }
 
         themeModal.classList.remove('hidden');
@@ -405,8 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     modalKitsContainer.addEventListener('click', e => {
-        const target = e.target.closest('button');
-        if (!target && !e.target.classList.contains('kit-image')) return;
+        const targetButton = e.target.closest('button');
 
         if (e.target.classList.contains('kit-image')) {
             lightboxImage.src = e.target.dataset.src;
@@ -415,8 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const dataset = target.dataset;
-        if (target.classList.contains('edit-btn')) {
+        if (!targetButton) return;
+
+        const dataset = targetButton.dataset;
+        if (targetButton.classList.contains('edit-btn')) {
             const id = dataset.themeId;
             const theme = themes.find(t => t.id === id);
             editingThemeId = id;
@@ -433,28 +445,28 @@ document.addEventListener('DOMContentLoaded', () => {
             addThemeFormContainer.classList.remove('hidden');
             closeModalBtn.click();
         }
-        if (target.classList.contains('delete-btn')) {
+        if (targetButton.classList.contains('delete-btn')) {
             const id = dataset.themeId;
             if (confirm('Tem a certeza que quer excluir este tema?')) {
                 themesCollection.doc(id).delete();
                 closeModalBtn.click();
             }
         }
-        if (target.classList.contains('rent-btn')) {
+        if (targetButton.classList.contains('rent-btn')) {
             currentRentalData.themeId = dataset.themeId;
             currentRentalData.kit = dataset.kit;
             const theme = themes.find(t => t.id === currentRentalData.themeId);
             rentalThemeInfo.textContent = `Agendar: ${theme.name} (Kit ${currentRentalData.kit})`;
             rentalModal.classList.remove('hidden');
         }
-        if (target.classList.contains('quote-btn')) {
+        if (targetButton.classList.contains('quote-btn')) {
             currentQuoteData.themeId = dataset.themeId;
             currentQuoteData.kit = dataset.kit;
             const theme = themes.find(t => t.id === currentQuoteData.themeId);
             quoteThemeInfo.textContent = `Orçamento: ${theme.name} (Kit ${currentQuoteData.kit})`;
             quoteModal.classList.remove('hidden');
         }
-        if (target.classList.contains('delete-rental-btn')) {
+        if (targetButton.classList.contains('delete-rental-btn')) {
             const themeId = dataset.themeId;
             const rentalIndex = parseInt(dataset.rentalIndex, 10);
             if (confirm('Tem a certeza que quer excluir este agendamento?')) {
