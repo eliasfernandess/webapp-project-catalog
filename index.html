@@ -38,7 +38,7 @@
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0">
-                     <img src="imgs/logo_site.svg" alt="Logo do site" class="h-12">
+                     <img src="https://placehold.co/150x50/FFFFFF/A855F7?text=LOGO&font=poppins" alt="Logo do site" class="h-12">
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-2">
@@ -181,14 +181,14 @@
     
     <!-- Modal de Detalhes do Tema -->
     <div id="themeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-30 opacity-0">
-        <div class="modal-content bg-fundo rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto relative transform scale-95">
+        <div class="modal-content bg-fundo rounded-lg shadow-2xl w-full max-w-md md:max-w-5xl max-h-[90vh] overflow-y-auto relative transform scale-95">
             <div class="bg-primaria text-center py-3 rounded-t-lg relative">
                 <h2 id="modalThemeName" class="text-xl sm:text-2xl font-bold text-white font-display">Nome do Tema</h2>
                 <button id="closeModalBtn" class="absolute top-1/2 -translate-y-1/2 right-3 text-white text-3xl hover:text-gray-200">&times;</button>
             </div>
             <div class="p-4 space-y-4">
                 <div id="modalScheduledDatesContainer"></div>
-                <div id="modalKitsContainer" class="space-y-4"></div>
+                <div id="modalKitsContainer" class="flex flex-col md:flex-row gap-4"></div>
             </div>
         </div>
     </div>
@@ -248,3 +248,4 @@
     </footer>
 </body>
 </html>
+
