@@ -275,14 +275,13 @@ document.addEventListener('DOMContentLoaded', () => {
             `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`
         ).join(' ');
 
-        // A ESTRUTURA HTML (desktop vs mobile) é controlada via CSS, mas a estrutura base é esta:
         cardContent.innerHTML = `
             <div class="relative">
-                <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}">
+                <img src="${theme.coverImage || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem'}" alt="Foto do tema ${theme.name}" class="w-full h-48 object-cover ${isRentedToday ? 'opacity-50' : ''}" loading="lazy">
                 ${isRentedToday ? '<div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center"><span class="text-texto-invertido font-bold text-lg">INDISPONÍVEL</span></div>' : ''}
             </div>
             <div class="p-4 flex flex-col flex-grow">
-                <div class="desktop-card-header">
+                 <div class="desktop-card-header">
                      <h3 class="text-lg font-bold text-texto-principal flex-1 pr-2 min-w-0">${theme.name}</h3>
                      <div class="flex flex-shrink-0 gap-1">
                         ${availableKitsHtml}
@@ -541,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const kitName = kit.charAt(0).toUpperCase() + kit.slice(1);
             kitDiv.innerHTML = `
-                <img src="${kitImage}" alt="Imagem do Kit ${kitName}" class="w-full object-cover rounded-lg shadow-md kit-image" data-src="${kitImage}">
+                <img src="${kitImage}" alt="Imagem do Kit ${kitName}" class="w-full object-cover rounded-lg shadow-md kit-image" data-src="${kitImage}" loading="lazy">
                 <p class="modal-kit-title mt-4">Pegue Monte - ${theme.name}</p>
                 <span class="kit-tag kit-tag-${kit}">${kitName}</span>
                 <p class="kit-price">${kitDetails[kit]?.price || ''}</p>
@@ -553,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentUser) {
             const adminButtons = document.createElement('div');
-            adminButtons.className = 'mt-6 pt-4 border-t flex flex-wrap gap-4 justify-center';
+            adminButtons.className = 'mt-6 pt-4 border-t flex flex-wrap gap-4 justify-center md:col-span-3';
             adminButtons.innerHTML = `
                 <button class="edit-btn btn-gradient btn-secundaria text-texto-principal" data-theme-id="${theme.id}">Editar Tema</button>
                 <button class="delete-btn btn-gradient btn-erro" data-theme-id="${theme.id}">Excluir Tema</button>
