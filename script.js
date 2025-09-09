@@ -104,8 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
         auth.onAuthStateChanged(user => {
             currentUser = user;
             updateUIBasedOnAuthState(user);
-            loadThemes(true);
-            fetchAllThemesForAdminTasks();
+            fetchAllThemesForAdminTasks().then(() => {
+                loadThemes(true);
+            });
         });
 
         [homeLink, mobileHomeLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'catalog')));
@@ -162,10 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allThemesForAdmin = [];
     async function fetchAllThemesForAdminTasks() {
-        if (!currentUser) {
-            allThemesForAdmin = [];
-            return;
-        }
         try {
             const snapshot = await themesCollection.get();
             allThemesForAdmin = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -460,8 +457,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             addThemeForm.reset();
             formModal.classList.add('hidden');
-            fetchAllThemesForAdminTasks(); // Refresh admin data
-            loadThemes(true); // Refresh catalog view
+            fetchAllThemesForAdminTasks();
+            loadThemes(true);
         } catch (error) {
             console.error("Erro ao salvar tema: ", error);
             formMessage.textContent = "Erro ao salvar. Tente novamente.";
