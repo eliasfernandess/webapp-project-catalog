@@ -123,18 +123,29 @@ document.addEventListener('DOMContentLoaded', () => {
             icons[1].classList.toggle('hidden');
         });
 
-        const handleFilterChange = () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
+        const applyFiltersAndSearch = (isFromSearch = false) => {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const activeCategory = categoryFilter.value;
+            const activeKit = kitFilter.value;
+            const isFiltering = searchTerm.length > 0 || activeCategory !== 'todas' || activeKit !== 'todos';
+
+            if (isFiltering) {
                 featuredSection.classList.add('hidden');
-                document.getElementById('all-kits-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                loadThemes(true);
-            }, 500); // Debounce search input
+                if (isFromSearch) {
+                    document.getElementById('all-kits-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                featuredSection.classList.remove('hidden');
+            }
+            loadThemes(true);
         };
 
-        searchInput.addEventListener('input', handleFilterChange);
-        categoryFilter.addEventListener('change', () => loadThemes(true));
-        kitFilter.addEventListener('change', () => loadThemes(true));
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => applyFiltersAndSearch(true), 300);
+        });
+        categoryFilter.addEventListener('change', () => applyFiltersAndSearch());
+        kitFilter.addEventListener('change', () => applyFiltersAndSearch());
 
         clearFiltersBtn.addEventListener('click', () => {
             searchInput.value = '';
@@ -245,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadThemes(isNewQuery = false) {
-        if (isLoadingMore) return;
+        if (isLoadingMore && !isNewQuery) return;
         isLoadingMore = true;
         loadingMoreIndicator.classList.remove('hidden');
 
@@ -255,50 +266,48 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogContainer.innerHTML = '';
         }
 
-        let query = themesCollection.orderBy('name');
-
-        const searchTerm = searchInput.value.toLowerCase();
+        const searchTerm = searchInput.value.trim().toLowerCase();
         const activeCategory = categoryFilter.value;
         const activeKit = kitFilter.value;
+        const isFiltering = searchTerm.length > 0 || activeCategory !== 'todas' || activeKit !== 'todos';
 
-        // A pesquisa por texto não é suportada nativamente com paginação sem um serviço de terceiros.
-        // A abordagem será filtrar no lado do cliente APENAS a página atual, 
-        // ou desativar a paginação ao pesquisar. Vamos para a segunda opção, que é mais precisa.
-        const isSearching = searchTerm.length > 0;
-        const isFiltering = activeCategory !== 'todas' || activeKit !== 'todos';
-
-        if (isSearching || isFiltering) {
-            if (isNewQuery) catalogContainer.innerHTML = '';
-
-            // Se for pesquisa por texto, busca todos e filtra no cliente.
-            if (isSearching) {
-                const results = allThemesForAdmin.filter(theme =>
+        if (isFiltering) {
+            let results = allThemesForAdmin;
+            if (searchTerm.length > 0) {
+                results = results.filter(theme =>
                     theme.name.toLowerCase().includes(searchTerm) ||
                     (theme.category && theme.category.toLowerCase().includes(searchTerm))
                 );
-                results.forEach(theme => catalogContainer.appendChild(createThemeCard(theme)));
-                isLoadingMore = false;
-                loadingMoreIndicator.classList.add('hidden');
-                return;
             }
-            // Se for filtro de categoria/kit, usa a query do Firebase.
-            if (activeCategory !== 'todas') query = query.where('category', '==', activeCategory);
-            if (activeKit !== 'todos') query = query.where('kits', 'array-contains', activeKit);
+            if (activeCategory !== 'todas') {
+                results = results.filter(theme => theme.category === activeCategory);
+            }
+            if (activeKit !== 'todos') {
+                results = results.filter(theme => theme.kits && theme.kits.includes(activeKit));
+            }
+
+            catalogContainer.innerHTML = '';
+            if (results.length === 0) {
+                catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
+            } else {
+                results.forEach(theme => catalogContainer.appendChild(createThemeCard(theme)));
+            }
+            isLoadingMore = false;
+            loadingMoreIndicator.classList.add('hidden');
+            return;
         }
 
-
-        if (lastVisible && !isNewQuery) {
+        let query = themesCollection.orderBy('name');
+        if (lastVisible) {
             query = query.startAfter(lastVisible);
         }
-
         query = query.limit(THEMES_PER_PAGE);
 
         try {
             const snapshot = await query.get();
             lastVisible = snapshot.docs[snapshot.docs.length - 1];
-
             if (snapshot.empty && isNewQuery) {
-                catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado.</p>`;
+                catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema para exibir.</p>`;
             } else {
                 snapshot.forEach(doc => {
                     const themeData = { id: doc.id, ...doc.data() };
