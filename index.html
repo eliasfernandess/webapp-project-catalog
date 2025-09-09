@@ -165,12 +165,11 @@
              <h2 class="text-2xl font-bold text-white font-display">TODOS OS KITS</h2>
         </div>
         <div class="bg-surface p-4 md:p-6 rounded-b-lg">
+            <div id="loadingIndicator" class="text-center py-10">
+                <p class="text-lg text-texto-secundario">A carregar temas...</p>
+            </div>
             <div id="theme-catalog" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Cards de temas serão inseridos aqui -->
-            </div>
-            <!-- OTIMIZAÇÃO: Indicador de carregamento para paginação -->
-            <div id="loadingMoreIndicator" class="text-center py-10 hidden">
-                <p class="text-lg text-texto-secundario">A carregar mais temas...</p>
             </div>
         </div>
     </main>
