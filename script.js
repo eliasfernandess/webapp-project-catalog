@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let lastVisible = null;
     let isLoadingMore = false;
+    let noMoreThemesToLoad = false;
     const THEMES_PER_PAGE = 12;
 
     const kitDetails = {
@@ -170,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('scroll', () => {
             const isFiltering = searchInput.value || categoryFilter.value !== 'todas' || kitFilter.value !== 'todos';
-            if (isLoadingMore || isFiltering) return;
+            if (isLoadingMore || isFiltering || noMoreThemesToLoad) return;
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
                 loadThemes(false);
             }
@@ -257,6 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadThemes(isNewQuery = false) {
         if (isLoadingMore && !isNewQuery) return;
+        if (noMoreThemesToLoad && !isNewQuery) {
+            loadingMoreIndicator.classList.add('hidden');
+            return;
+        }
+
         isLoadingMore = true;
         loadingMoreIndicator.classList.remove('hidden');
 
@@ -264,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             lastVisible = null;
             themes = [];
             catalogContainer.innerHTML = '';
+            noMoreThemesToLoad = false;
         }
 
         const searchTerm = searchInput.value.trim().toLowerCase();
@@ -306,6 +313,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const snapshot = await query.get();
             lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+            if (snapshot.docs.length < THEMES_PER_PAGE) {
+                noMoreThemesToLoad = true;
+            }
+
             if (snapshot.empty && isNewQuery) {
                 catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema para exibir.</p>`;
             } else {
