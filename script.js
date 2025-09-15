@@ -15,6 +15,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 const themesCollection = db.collection('themes');
 const quotesCollection = db.collection('solicitacoes');
+const usersCollection = db.collection('users');
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('mainContent');
     const reportsScreen = document.getElementById('reportsScreen');
     const rentalsScreen = document.getElementById('rentalsScreen');
+    const employeesScreen = document.getElementById('employeesScreen');
     const monthlyRentalsContainer = document.getElementById('monthlyRentalsContainer');
     const formModal = document.getElementById('formModal');
     const closeFormModalBtn = document.getElementById('closeFormModalBtn');
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginLink = document.getElementById('loginLink');
     const reportsLink = document.getElementById('reportsLink');
     const rentalsLink = document.getElementById('rentalsLink');
+    const employeesLink = document.getElementById('employeesLink');
     const logoutBtn = document.getElementById('logoutBtn');
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -51,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileLoginLink = document.getElementById('mobileLoginLink');
     const mobileReportsLink = document.getElementById('mobileReportsLink');
     const mobileRentalsLink = document.getElementById('mobileRentalsLink');
+    const mobileEmployeesLink = document.getElementById('mobileEmployeesLink');
     const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
     const loginForm = document.getElementById('loginForm');
     const loginMessage = document.getElementById('loginMessage');
@@ -94,12 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const featuredContainer = document.getElementById('featured-container');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const createEmployeeForm = document.getElementById('createEmployeeForm');
+    const employeeFormMessage = document.getElementById('employeeFormMessage');
+    const employeeListContainer = document.getElementById('employeeListContainer');
 
     let editingThemeId = null;
     let currentRentalData = {};
     let currentQuoteData = {};
     let carouselIndex = 0;
     let searchTimeout;
+    const ADMIN_EMAIL = "hiperfestaaraguari@gmail.com"; 
+    let adminCredentials = null;
 
     function initialize() {
         populateDateSelectors();
@@ -109,11 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAllThemesForAdminTasks().then(() => {
                 loadThemes(true);
             });
+            if(currentUser && currentUser.email === ADMIN_EMAIL) {
+                displayEmployees();
+            }
         });
 
         [homeLink, mobileHomeLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'catalog')));
         [reportsLink, mobileReportsLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'reports')));
         [rentalsLink, mobileRentalsLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'rentals')));
+        [employeesLink, mobileEmployeesLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'employees')));
         [loginLink, mobileLoginLink].forEach(el => el.addEventListener('click', (e) => showScreen(e, 'login')));
         [logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', () => auth.signOut()));
 
@@ -132,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isFiltering) {
                 featuredSection.classList.add('hidden');
-                if (isFromSearch) {
+                 if (isFromSearch) {
                     document.getElementById('all-kits-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } else {
@@ -176,6 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadThemes(false);
             }
         });
+
+        createEmployeeForm.addEventListener('submit', createEmployee);
     }
 
     let allThemesForAdmin = [];
@@ -216,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginScreen.classList.add('hidden');
         reportsScreen.classList.add('hidden');
         rentalsScreen.classList.add('hidden');
+        employeesScreen.classList.add('hidden');
         navLinks.forEach(link => link.classList.remove('active'));
         if (screenName === 'catalog') mainContent.classList.remove('hidden');
         else if (screenName === 'login') loginScreen.classList.remove('hidden');
@@ -223,8 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (screenName === 'rentals') {
             rentalsScreen.classList.remove('hidden');
             displayMonthlyRentals();
+        } else if (screenName === 'employees') {
+            employeesScreen.classList.remove('hidden');
         }
-        if (document.getElementById(`${screenName}Link`)) {
+        if(document.getElementById(`${screenName}Link`)) {
             document.getElementById(`${screenName}Link`).classList.add('active');
             const mobileLink = document.getElementById(`mobile${screenName.charAt(0).toUpperCase() + screenName.slice(1)}Link`);
             if (mobileLink) mobileLink.classList.add('active');
@@ -234,6 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateUIBasedOnAuthState(user) {
         const isAdmin = !!user;
+        const isMainAdmin = user && user.email === ADMIN_EMAIL;
+        
         loginLink.classList.toggle('hidden', isAdmin);
         mobileLoginLink.classList.toggle('hidden', isAdmin);
         logoutBtn.classList.toggle('hidden', !isAdmin);
@@ -243,12 +263,23 @@ document.addEventListener('DOMContentLoaded', () => {
         rentalsLink.classList.toggle('hidden', !isAdmin);
         mobileRentalsLink.classList.toggle('hidden', !isAdmin);
         adminControls.classList.toggle('hidden', !isAdmin);
+
+        employeesLink.classList.toggle('hidden', !isMainAdmin);
+        mobileEmployeesLink.classList.toggle('hidden', !isMainAdmin);
+
         if (!isAdmin) showScreen(null, 'catalog');
     }
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        auth.signInWithEmailAndPassword(e.target.email.value, e.target.password.value)
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+
+        if(email === ADMIN_EMAIL) {
+            adminCredentials = { email, password };
+        }
+
+        auth.signInWithEmailAndPassword(email, password)
             .then(() => showScreen(null, 'catalog'))
             .catch(error => {
                 loginMessage.textContent = "Email ou senha inválidos.";
@@ -281,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isFiltering) {
             let results = allThemesForAdmin;
             if (searchTerm.length > 0) {
-                results = results.filter(theme =>
+                results = results.filter(theme => 
                     theme.name.toLowerCase().includes(searchTerm) ||
                     (theme.category && theme.category.toLowerCase().includes(searchTerm))
                 );
@@ -292,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeKit !== 'todos') {
                 results = results.filter(theme => theme.kits && theme.kits.includes(activeKit));
             }
-
+            
             catalogContainer.innerHTML = '';
             if (results.length === 0) {
                 catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema encontrado para os filtros selecionados.</p>`;
@@ -313,13 +344,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const snapshot = await query.get();
             lastVisible = snapshot.docs[snapshot.docs.length - 1];
-
+            
             if (snapshot.docs.length < THEMES_PER_PAGE) {
                 noMoreThemesToLoad = true;
             }
 
             if (snapshot.empty && isNewQuery) {
-                catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema para exibir.</p>`;
+                 catalogContainer.innerHTML = `<p class="col-span-full text-center text-texto-secundario">Nenhum tema para exibir.</p>`;
             } else {
                 snapshot.forEach(doc => {
                     const themeData = { id: doc.id, ...doc.data() };
@@ -334,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingMoreIndicator.classList.add('hidden');
         }
     }
-
+    
     function populateCategoryFilter(themesToSource) {
         const source = themesToSource || themes;
         const categories = [...new Set(source.map(theme => theme.category).filter(Boolean))].sort();
@@ -350,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         categoryFilter.value = currentCategory;
     }
-
+    
     function getOptimizedImageUrl(url, width) {
         if (!url || url.includes('placehold.co')) return url;
         return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=80&output=webp`;
@@ -361,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardContent = document.createElement('div');
         cardContent.className = `theme-card bg-surface rounded-xl shadow-md overflow-hidden flex flex-col h-full`;
         let availableKitsHtml = (theme.kits || []).map(kit => `<span class="kit-badge kit-badge-${kit.charAt(0).toLowerCase()}">${kit.charAt(0).toUpperCase()}</span>`).join(' ');
-
+        
         const optimizedCoverImage = getOptimizedImageUrl(theme.coverImage, 400);
 
         cardContent.innerHTML = `
@@ -393,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayMonthlyRentals() {
-        if (!allThemesForAdmin.length) return;
+        if(!allThemesForAdmin.length) return;
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
@@ -418,13 +449,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-sm text-texto-secundario">Cliente: ${rental.clientName || 'Não informado'}</p>
                 </div>
                 <div class="text-right">
-                    <p class="font-semibold text-primaria">${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
-                    <p class="text-sm text-texto-secundario">a ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
+                    <p class="font-semibold text-primaria">${new Date(rental.startDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</p>
+                    <p class="text-sm text-texto-secundario">a ${new Date(rental.endDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</p>
                 </div>
             </div>
         `).join('');
     }
-
+    
     function setupFeaturedCarousel(sourceThemes) {
         const featuredThemes = (sourceThemes || themes).filter(theme => theme.featured);
         featuredContainer.innerHTML = '';
@@ -436,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
             featuredSection.classList.add('hidden');
         }
     }
-
+    
     function getItemsPerPage() {
         if (window.innerWidth < 640) return 2;
         if (window.innerWidth < 1024) return 3;
@@ -496,8 +527,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             addThemeForm.reset();
             formModal.classList.add('hidden');
-            await fetchAllThemesForAdminTasks();
-            loadThemes(true);
+            await fetchAllThemesForAdminTasks(); 
+            loadThemes(true); 
         } catch (error) {
             console.error("Erro ao salvar tema: ", error);
             formMessage.textContent = "Erro ao salvar. Tente novamente.";
@@ -511,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function isThemeRentedOnDate(theme, checkStartDate, checkEndDate = null) {
-        if (!theme.rentals || theme.rentals.length === 0) return false;
+       if (!theme.rentals || theme.rentals.length === 0) return false;
         const startCheck = new Date(checkStartDate + 'T00:00:00');
         const endCheck = checkEndDate ? new Date(checkEndDate + 'T00:00:00') : startCheck;
         return theme.rentals.some(rental => {
@@ -526,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const doc = await themeRef.get();
         if (!doc.exists) return;
         const theme = { id: doc.id, ...doc.data() };
-
+        
         modalThemeName.textContent = theme.name;
         modalKitsContainer.innerHTML = '';
         modalScheduledDatesContainer.innerHTML = '';
@@ -538,13 +569,13 @@ document.addEventListener('DOMContentLoaded', () => {
             rentalsListHtml += '<ul class="list-none text-sm text-texto-secundario space-y-1">';
             theme.rentals.forEach((rental, index) => {
                 const deleteButton = currentUser ? `<button class="delete-rental-btn text-erro hover:text-red-700 font-bold ml-4" data-theme-id="${theme.id}" data-rental-index="${index}">Excluir</button>` : '';
-                rentalsListHtml += `<li class="flex justify-center items-center"><span><b>${currentUser ? (rental.clientName || 'Cliente') + ` (Kit ${rental.kit})` : 'Indisponível'}:</b> ${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} a ${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>${deleteButton}</li>`;
+                rentalsListHtml += `<li class="flex justify-center items-center"><span><b>${currentUser ? (rental.clientName || 'Cliente') + ` (Kit ${rental.kit})` : 'Indisponível'}:</b> ${new Date(rental.startDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} a ${new Date(rental.endDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>${deleteButton}</li>`;
             });
             rentalsListHtml += '</ul>';
             rentalsSection.innerHTML = rentalsListHtml;
             modalScheduledDatesContainer.appendChild(rentalsSection);
         }
-
+    
         (theme.kits || []).forEach(kit => {
             const kitImage = theme.images?.[kit] || 'https://placehold.co/400x300/e2e8f0/adb5bd?text=Sem+Imagem';
             const optimizedKitImage = getOptimizedImageUrl(kitImage, 600);
@@ -568,7 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
             adminButtons.innerHTML = `<button class="edit-btn btn-gradient btn-secundaria text-texto-principal" data-theme-id="${theme.id}">Editar Tema</button><button class="delete-btn btn-gradient btn-erro" data-theme-id="${theme.id}">Excluir Tema</button>`;
             modalKitsContainer.appendChild(adminButtons);
         }
-
+    
         themeModal.classList.remove('hidden');
         setTimeout(() => {
             themeModal.classList.remove('opacity-0');
@@ -641,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalKitsContainer.addEventListener('click', e => handleModalInteraction(e));
     modalScheduledDatesContainer.addEventListener('click', e => handleModalInteraction(e));
-
+    
     closeImageModalBtn.addEventListener('click', () => {
         imageModal.classList.add('opacity-0');
         setTimeout(() => imageModal.classList.add('hidden'), 300);
@@ -724,8 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModalBtn.click();
     });
 
-    async function downloadReport() {
-        if (!allThemesForAdmin.length) {
+     async function downloadReport() {
+        if(!allThemesForAdmin.length) {
             showAlert('Dados de temas ainda não carregados. Tente novamente em alguns instantes.');
             return;
         }
@@ -750,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "Nome do Cliente,Telefone,Tema,Kit,Data de Inicio,Data de Fim\r\n";
         reportRentals.forEach(rental => {
-            const row = [`"${rental.clientName || ''}"`, `"${rental.clientPhone || ''}"`, `"${rental.themeName}"`, `"${rental.kit}"`, `"${new Date(rental.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`, `"${new Date(rental.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}"`].join(',');
+            const row = [`"${rental.clientName||''}"`, `"${rental.clientPhone||''}"`, `"${rental.themeName}"`, `"${rental.kit}"`, `"${new Date(rental.startDate).toLocaleDateString('pt-BR',{timeZone:'UTC'})}"`, `"${new Date(rental.endDate).toLocaleDateString('pt-BR',{timeZone:'UTC'})}"`].join(',');
             csvContent += row + "\r\n";
         });
         const encodedUri = encodeURI(csvContent);
@@ -760,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+     }
 
     async function deleteRental(themeId, rentalIndex) {
         const themeRef = themesCollection.doc(themeId);
@@ -770,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rentals = doc.data().rentals || [];
             rentals.splice(rentalIndex, 1);
             await themeRef.update({ rentals });
-
+            
             closeModalBtn.click();
             openThemeModal(themeId);
             fetchAllThemesForAdminTasks(); // Refresh data
@@ -780,6 +811,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function createEmployee(e) {
+        e.preventDefault();
+        if (!adminCredentials) {
+            showAlert("Erro: As credenciais do administrador não foram encontradas. Por favor, inicie a sessão novamente.");
+            return;
+        }
+
+        const email = document.getElementById('employeeEmail').value;
+        const password = document.getElementById('employeePassword').value;
+        employeeFormMessage.textContent = '';
+        employeeFormMessage.classList.remove('text-erro', 'text-sucesso');
+
+        try {
+            const secondaryApp = firebase.initializeApp(firebaseConfig, 'secondary');
+            const secondaryAuth = secondaryApp.auth();
+            
+            const userCredential = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+            
+            await usersCollection.doc(userCredential.user.uid).set({
+                email: userCredential.user.email,
+                role: 'employee'
+            });
+
+            await secondaryAuth.signOut();
+            await secondaryApp.delete();
+
+            employeeFormMessage.textContent = 'Funcionário criado com sucesso!';
+            employeeFormMessage.classList.add('text-sucesso');
+            createEmployeeForm.reset();
+            displayEmployees();
+
+        } catch (error) {
+            console.error("Erro ao criar funcionário:", error);
+            employeeFormMessage.textContent = `Erro: ${error.message}`;
+            employeeFormMessage.classList.add('text-erro');
+            
+            try {
+                const secondaryApp = firebase.app('secondary');
+                await secondaryApp.delete();
+            } catch (e) {
+                // ignore if it doesn't exist
+            }
+        }
+    }
+
+    async function displayEmployees() {
+        employeeListContainer.innerHTML = '';
+        try {
+            const snapshot = await usersCollection.get();
+            snapshot.forEach(doc => {
+                const employee = doc.data();
+                if(employee.email === ADMIN_EMAIL) return; // Don't show the admin
+                
+                const employeeDiv = document.createElement('div');
+                employeeDiv.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg';
+                employeeDiv.innerHTML = `
+                    <span>${employee.email}</span>
+                    <button data-id="${doc.id}" class="remove-employee-btn bg-erro text-white px-3 py-1 rounded-lg hover:bg-red-600">Remover</button>
+                `;
+                employeeListContainer.appendChild(employeeDiv);
+            });
+
+            document.querySelectorAll('.remove-employee-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const docId = e.target.dataset.id;
+                    if(confirm("Tem a certeza que quer remover o acesso deste funcionário? Esta ação não pode ser desfeita.")) {
+                       showAlert("Esta funcionalidade requer configuração do lado do servidor (Firebase Functions) e não pode ser implementada de forma segura diretamente no cliente.", "Funcionalidade Indisponível");
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error("Erro ao listar funcionários:", error);
+        }
+    }
+    
     initialize();
 });
-

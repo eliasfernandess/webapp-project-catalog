@@ -16,7 +16,7 @@ body {
     font-weight: 700;
 }
 
-/* --- ESTILOS DE BOTÕES COM GRADIENTE --- */
+/* --- ESTILOS DE BOTÃ•ES COM GRADIENTE --- */
 .btn-gradient {
     transition: all 0.3s ease;
     border: none;
@@ -48,7 +48,7 @@ body {
     box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Gradientes específicos */
+/* Gradientes especÃ­ficos */
 .btn-primaria {
     background-image: linear-gradient(45deg, var(--cor-primaria) 0%, var(--cor-primaria-escura) 51%, var(--cor-primaria) 100%);
 }
@@ -91,7 +91,7 @@ body {
     color: var(--cor-texto-principal); 
 }
 
-/* Efeito de hover e transição para os cartões */
+/* Efeito de hover e transiÃ§Ã£o para os cartÃµes */
 .theme-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -191,8 +191,9 @@ body {
     gap: 0.5rem;
 }
 
-/* Esconde/Mostra layout de acordo com o tamanho do ecrã */
+/* Esconde/Mostra layout de acordo com o tamanho do ecrÃ£ */
 .mobile-card-header { display: none; }
+.theme-card h3 { min-width: 0; }
 .desktop-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .desktop-card-category { display: block; }
 
@@ -222,7 +223,7 @@ body {
     background-color: white;
 }
 
-/* Ajuste para botões do carrossel no telemóvel */
+/* Ajuste para botÃµes do carrossel no telemÃ³vel */
 @media (max-width: 768px) {
     .carousel-btn {
         width: 32px;
@@ -238,21 +239,21 @@ body {
 }
 
 
-/* Animação para o brilho do kit Ouro */
+/* AnimaÃ§Ã£o para o brilho do kit Ouro */
 @keyframes pulse-gold {
     0% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
     50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(250, 204, 21, 0.8); }
     100% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
 }
 
-/* Ajustes finos de layout para telemóveis */
+/* Ajustes finos de layout para telemÃ³veis */
 @media (max-width: 640px) {
     .desktop-card-header, .desktop-card-category {
         display: none;
     }
     .mobile-card-header {
         display: block;
-        margin-bottom: 0.5rem; /* Adiciona espaço antes dos emblemas */
+        margin-bottom: 0.5rem; /* Adiciona espaÃ§o antes dos emblemas */
     }
     .kit-badge {
         width: auto;   
@@ -263,4 +264,3 @@ body {
         font-size: 0.8rem;
     }
 }
-
