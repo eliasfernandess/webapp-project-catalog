@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuoteData = {};
     let carouselIndex = 0;
     let searchTimeout;
-    const ADMIN_EMAIL = "hiperfestaaraguari@gmail.com"; 
+    const ADMIN_EMAIL = "eliascoelhogf@gmail.com"; 
     let adminCredentials = null;
 
     function initialize() {
