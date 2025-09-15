@@ -107,8 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuoteData = {};
     let carouselIndex = 0;
     let searchTimeout;
-    const ADMIN_EMAIL = "eliascoelhogf@gmail.com"; 
-    let adminCredentials = null;
+    const ADMIN_EMAIL = "hiperfestaaraguari@gmail.com"; 
 
     function initialize() {
         populateDateSelectors();
@@ -274,10 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
-
-        if(email === ADMIN_EMAIL) {
-            adminCredentials = { email, password };
-        }
 
         auth.signInWithEmailAndPassword(email, password)
             .then(() => showScreen(null, 'catalog'))
@@ -760,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showAlert('Dados de temas ainda não carregados. Tente novamente em alguns instantes.');
             return;
         }
-        const year = parseInt(reportYearSelect.value, 10);
+       const year = parseInt(reportYearSelect.value, 10);
         const month = parseInt(reportMonthSelect.value, 10);
         const reportRentals = [];
         allThemesForAdmin.forEach(theme => {
@@ -813,10 +808,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function createEmployee(e) {
         e.preventDefault();
-        if (!adminCredentials) {
-            showAlert("Erro: As credenciais do administrador não foram encontradas. Por favor, inicie a sessão novamente.");
-            return;
-        }
 
         const email = document.getElementById('employeeEmail').value;
         const password = document.getElementById('employeePassword').value;
@@ -824,7 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
         employeeFormMessage.classList.remove('text-erro', 'text-sucesso');
 
         try {
-            const secondaryApp = firebase.initializeApp(firebaseConfig, 'secondary');
+            // Criar uma instância secundária da app para não deslogar o admin
+            const secondaryApp = firebase.initializeApp(firebaseConfig, 'secondary-auth-app');
             const secondaryAuth = secondaryApp.auth();
             
             const userCredential = await secondaryAuth.createUserWithEmailAndPassword(email, password);
@@ -847,11 +839,12 @@ document.addEventListener('DOMContentLoaded', () => {
             employeeFormMessage.textContent = `Erro: ${error.message}`;
             employeeFormMessage.classList.add('text-erro');
             
+            // Limpa a app secundária em caso de erro
             try {
-                const secondaryApp = firebase.app('secondary');
+                const secondaryApp = firebase.app('secondary-auth-app');
                 await secondaryApp.delete();
             } catch (e) {
-                // ignore if it doesn't exist
+                // ignora se não existir
             }
         }
     }
@@ -862,7 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = await usersCollection.get();
             snapshot.forEach(doc => {
                 const employee = doc.data();
-                if(employee.email === ADMIN_EMAIL) return; // Don't show the admin
+                if(employee.email === ADMIN_EMAIL) return; // Não mostra o admin
                 
                 const employeeDiv = document.createElement('div');
                 employeeDiv.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg';
@@ -877,7 +870,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.addEventListener('click', async (e) => {
                     const docId = e.target.dataset.id;
                     if(confirm("Tem a certeza que quer remover o acesso deste funcionário? Esta ação não pode ser desfeita.")) {
-                       showAlert("Esta funcionalidade requer configuração do lado do servidor (Firebase Functions) e não pode ser implementada de forma segura diretamente no cliente.", "Funcionalidade Indisponível");
+                       showAlert("A remoção completa de funcionários requer configuração do lado do servidor (Firebase Functions) e não pode ser implementada de forma segura diretamente no cliente. O funcionário foi removido da lista visível.", "Funcionalidade Limitada");
+                       // Workaround: apagar o documento do Firestore para o remover da lista visível
+                       await usersCollection.doc(docId).delete();
+                       displayEmployees();
                     }
                 });
             });
@@ -889,3 +885,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     initialize();
 });
+
