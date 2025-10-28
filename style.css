@@ -10,13 +10,13 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-/* Estilo para links ativos no menu */
+
 .nav-link.active {
     background-color: rgba(255, 255, 255, 0.2);
     font-weight: 700;
 }
 
-/* --- ESTILOS DE BOTÃ•ES COM GRADIENTE --- */
+
 .btn-gradient {
     transition: all 0.3s ease;
     border: none;
@@ -48,7 +48,7 @@ body {
     box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Gradientes especÃ­ficos */
+
 .btn-primaria {
     background-image: linear-gradient(45deg, var(--cor-primaria) 0%, var(--cor-primaria-escura) 51%, var(--cor-primaria) 100%);
 }
@@ -67,7 +67,7 @@ body {
      color: var(--cor-texto-principal);
 }
 
-/* --- ESTILOS DOS EMBLEMAS DOS KITS COM EFEITO DE BRILHO --- */
+
 .kit-badge {
     width: 28px;
     height: 28px;
@@ -91,7 +91,7 @@ body {
     color: var(--cor-texto-principal); 
 }
 
-/* Efeito de hover e transiÃ§Ã£o para os cartÃµes */
+
 .theme-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -105,7 +105,7 @@ body {
     cursor: pointer;
 }
 
-/* Estilos para o novo Modal de Detalhes */
+
 .modal-content {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
@@ -239,21 +239,21 @@ body {
 }
 
 
-/* AnimaÃ§Ã£o para o brilho do kit Ouro */
+
 @keyframes pulse-gold {
     0% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
     50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(250, 204, 21, 0.8); }
     100% { transform: scale(1); box-shadow: 0 0 15px 3px rgba(250, 204, 21, 0.6); }
 }
 
-/* Ajustes finos de layout para telemÃ³veis */
+
 @media (max-width: 640px) {
     .desktop-card-header, .desktop-card-category {
         display: none;
     }
     .mobile-card-header {
         display: block;
-        margin-bottom: 0.5rem; /* Adiciona espaÃ§o antes dos emblemas */
+        margin-bottom: 0.5rem; 
     }
     .kit-badge {
         width: auto;   
