@@ -1,28 +1,28 @@
 :root {
-  /* Cores Principais - Mantidas para textos, bordas, etc. */
-  --cor-primaria: #8b5cf6;       /* Roxo principal */
-  --cor-primaria-escura: #7c3aed; /* Roxo mais escuro para gradientes e hovers */
-  --cor-secundaria: #f59e0b;     /* Laranja/Amarelo para botões de edição */
-  --cor-destaque: #facc15;       /* Amarelo para botões de destaque */
+ 
+  --cor-primaria: #8b5cf6;      
+  --cor-primaria-escura: #7c3aed; 
+  --cor-secundaria: #f59e0b;    
+  --cor-destaque: #facc15;    
 
-  /* Cores dos Kits - Atualizadas para o novo visual com brilho */
-  --cor-kit-bronze: #ef7d44;       /* Vermelho (substituindo o laranja) */
-  --cor-kit-bronze-escuro: #ab5a18; /* Vermelho Escuro */
+
+  --cor-kit-bronze: #ef7d44;    
+  --cor-kit-bronze-escuro: #ab5a18; 
   --cor-kit-prata: #a8a29e;
   --cor-kit-prata-escuro: #78716c;
   --cor-kit-ouro: #facc15;
   --cor-kit-ouro-escuro: #eab308;
 
-  /* Cores de Fundo */
-  --cor-fundo: #f8f7ff;         /* Lilás muito claro */
-  --cor-surface: #ffffff;      /* Branco */
 
-  /* Cores de Texto */
+  --cor-fundo: #f8f7ff;  
+  --cor-surface: #ffffff;   
+
+
   --cor-texto-principal: #1f2937;
   --cor-texto-secundario: #6b7280;
   --cor-texto-invertido: #ffffff;
 
-  /* Cores de Feedback */
+
   --cor-sucesso: #22c55e;
   --cor-sucesso-escuro: #16a34a;
   --cor-erro: #ef4444;
