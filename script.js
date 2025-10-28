@@ -1,4 +1,4 @@
-// --- JAVASCRIPT COMPLETO E ATUALIZADO ---
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9rM4TwAhSPU_e96W0xqg1IDYENFup5i8",
@@ -9,7 +9,7 @@ const firebaseConfig = {
     appId: "1:652648205775:web:9837a525048bb819a096ba"
 };
 
-// Inicializa o Firebase
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ouro: { price: 'R$ 300,00' }
     };
 
-    // --- ELEMENTOS DA PÁGINA ---
+
     const loginScreen = document.getElementById('loginScreen');
     const mainContent = document.getElementById('mainContent');
     const reportsScreen = document.getElementById('reportsScreen');
@@ -815,7 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
         employeeFormMessage.classList.remove('text-erro', 'text-sucesso');
 
         try {
-            // Criar uma instância secundária da app para não deslogar o admin
+           
             const secondaryApp = firebase.initializeApp(firebaseConfig, 'secondary-auth-app');
             const secondaryAuth = secondaryApp.auth();
             
@@ -839,12 +839,11 @@ document.addEventListener('DOMContentLoaded', () => {
             employeeFormMessage.textContent = `Erro: ${error.message}`;
             employeeFormMessage.classList.add('text-erro');
             
-            // Limpa a app secundária em caso de erro
+          
             try {
                 const secondaryApp = firebase.app('secondary-auth-app');
                 await secondaryApp.delete();
             } catch (e) {
-                // ignora se não existir
             }
         }
     }
@@ -855,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = await usersCollection.get();
             snapshot.forEach(doc => {
                 const employee = doc.data();
-                if(employee.email === ADMIN_EMAIL) return; // Não mostra o admin
+                if(employee.email === ADMIN_EMAIL) return; 
                 
                 const employeeDiv = document.createElement('div');
                 employeeDiv.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg';
@@ -871,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const docId = e.target.dataset.id;
                     if(confirm("Tem a certeza que quer remover o acesso deste funcionário? Esta ação não pode ser desfeita.")) {
                        showAlert("A remoção completa de funcionários requer configuração do lado do servidor (Firebase Functions) e não pode ser implementada de forma segura diretamente no cliente. O funcionário foi removido da lista visível.", "Funcionalidade Limitada");
-                       // Workaround: apagar o documento do Firestore para o remover da lista visível
+                       
                        await usersCollection.doc(docId).delete();
                        displayEmployees();
                     }
